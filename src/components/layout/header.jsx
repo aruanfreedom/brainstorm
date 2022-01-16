@@ -1,11 +1,15 @@
 import React from "react";
 import { Layout } from "antd";
+import styled from "styled-components";
 
-const { Header } = Layout;
+const Header = styled(Layout.Header)``;
+const Title = styled.h1`
+  color: #fff;
+`;
 
 const HeaderWrapper = () => (
-  <Header className="header">
-    <span className="title">Генерация идей</span>
+  <Header>
+    <Title>Генерация идей</Title>
   </Header>
 );
 

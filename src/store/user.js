@@ -1,18 +1,26 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-export const counterSlice = createSlice({
+export const userSlice = createSlice({
   name: "user",
   initialState: {
-      uid: "",
+    uid: "",
+    role: "",
+    settings: {},
   },
   reducers: {
-    addUser: (state, { payload }) => {
-      console.log(payload);
-      state.uid = payload;
+    addUser: (state, { payload: uid }) => {
+      state.uid = uid;
+    },
+    addMember: (state) => {
+      state.role = "member";
+    },
+    addSettings: (state, { payload: settings }) => {
+      state.settings = settings;
+      state.role = "admin";
     },
   },
 });
 
-export const { addUser } = counterSlice.actions;
+export const { addUser, addSettings, addMember } = userSlice.actions;
 
-export default counterSlice.reducer;
+export default userSlice.reducer;

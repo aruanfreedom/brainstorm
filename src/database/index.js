@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import store from "../store";
 import { addUser } from "../store/user";
 import logger from "../logger";
@@ -18,10 +19,8 @@ const init = () => {
 
 const authChangeListener = (auth) =>
   onAuthStateChanged(auth, (user) => {
-    console.log(user);
     if (user) {
       store.dispatch(addUser(user.uid));
-      console.log(store.getState());
     } else {
       // User is signed out
       // ...
@@ -29,19 +28,25 @@ const authChangeListener = (auth) =>
   });
 
 const reqistry = (auth) =>
-  signInAnonymously(auth)
-    .then(() => {
-      console.log("auth");
-    })
-    .catch((error) => {
-      logger(error);
-    });
+  signInAnonymously(auth).catch((error) => logger(error));
+
+const writeData = ({ path, data }) => {
+  if (!path || !data) return null;
+
+  const firestore = getFirestore();
+  const ref = doc(firestore, path);
+
+  return setDoc(ref, data).catch((e) => {
+    logger(e);
+  });
+};
 
 const database = {
   auth: () => getAuth(),
   init,
   authChangeListener: (auth) => authChangeListener(auth),
   reqistry: (auth) => reqistry(auth),
+  writeData,
 };
 
 export default database;

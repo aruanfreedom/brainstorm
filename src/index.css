@@ -7,27 +7,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.layout,
-.content,
 #root {
   height: 100%;
-}
-
-.content {
-  border-radius: 7px;
-  background-color: #fff;
-  padding: 45px;
-  margin: 45px;
-}
-
-.footer {
-  text-align: center;
-}
-
-.header .title {
-  color: #fff;
-}
-
-.title {
-  text-align: center;
 }
