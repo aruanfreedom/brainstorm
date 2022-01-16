@@ -22,8 +22,11 @@ const Admin = () => {
 
     database
       .writeData({
-        path: `admins/${user.uid}`,
-        data: prepareDataFetch(formData),
+        path: `rooms/${user.uid}`,
+        data: {
+          settings: prepareDataFetch(formData),
+          admin: user.uid,
+        },
       })
       .then(() => {
         dispatch(addSettings(formData));
@@ -48,7 +51,7 @@ const Admin = () => {
               autoComplete="off"
             >
               <Form.Item
-                label="Время голосования"
+                label="Время голосования (в минутах)"
                 name="timeVoute"
                 rules={[
                   {
@@ -60,6 +63,7 @@ const Admin = () => {
                 <Input
                   type="number"
                   size="large"
+                  maxLength={2}
                   placeholder="Введите время голосования"
                 />
               </Form.Item>
@@ -77,6 +81,7 @@ const Admin = () => {
                 <Input
                   size="large"
                   type="number"
+                  maxLength={2}
                   placeholder="Введите количество идей"
                 />
               </Form.Item>
@@ -94,6 +99,7 @@ const Admin = () => {
                 <Input
                   size="large"
                   type="number"
+                  maxLength={2}
                   placeholder="Введите количество оценок"
                 />
               </Form.Item>

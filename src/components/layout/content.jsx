@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Layout } from "antd";
+import { Layout, Spin } from "antd";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 const Content = styled(Layout.Content)`
@@ -12,7 +13,8 @@ const Content = styled(Layout.Content)`
 `;
 
 const ContentWrapper = ({ children }) => {
-  return <Content>{children}</Content>;
+  const loader = useSelector((state) => state.loader);
+  return <Content>{loader.main ? <Spin /> : children}</Content>;
 };
 
 ContentWrapper.propTypes = {

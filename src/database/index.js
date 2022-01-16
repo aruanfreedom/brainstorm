@@ -1,9 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
 import store from "../store";
 import { addUser } from "../store/user";
 import logger from "../logger";
+import { hideMainLoader, showMainLoader } from "../store/loader";
 
 const init = () => {
   initializeApp({
@@ -27,8 +28,13 @@ const authChangeListener = (auth) =>
     }
   });
 
-const reqistry = (auth) =>
-  signInAnonymously(auth).catch((error) => logger(error));
+const reqistry = (auth) => {
+  store.dispatch(showMainLoader());
+
+  signInAnonymously(auth)
+    .catch((error) => logger(error))
+    .finally(() => store.dispatch(hideMainLoader()));
+}
 
 const writeData = ({ path, data }) => {
   if (!path || !data) return null;
@@ -36,10 +42,19 @@ const writeData = ({ path, data }) => {
   const firestore = getFirestore();
   const ref = doc(firestore, path);
 
-  return setDoc(ref, data).catch((e) => {
+  return setDoc(ref, data, { merge: true }).catch((e) => {
     logger(e);
   });
 };
+
+const listenerData = ({ path, updatedData }) => {
+  const firestore = getFirestore();
+  const ref = doc(firestore, path);
+
+  onSnapshot(ref, (doc) => {
+    updatedData(doc.data());
+  });
+}
 
 const database = {
   auth: () => getAuth(),
@@ -47,6 +62,7 @@ const database = {
   authChangeListener: (auth) => authChangeListener(auth),
   reqistry: (auth) => reqistry(auth),
   writeData,
+  listenerData,
 };
 
 export default database;
