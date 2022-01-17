@@ -25,7 +25,7 @@ const Admin = () => {
         path: `rooms/${user.uid}`,
         data: {
           settings: prepareDataFetch(formData),
-          admin: user.uid,
+          adminId: user.uid,
         },
       })
       .then(() => {
@@ -119,16 +119,18 @@ const Admin = () => {
                 <Switch />
               </Form.Item>
 
-              <Form.Item>
-                <Button
-                  disabled={loading}
-                  size="large"
-                  type="primary"
-                  htmlType="submit"
-                >
-                  Готово
-                </Button>
-              </Form.Item>
+              <Row justify="center">
+                <Form.Item>
+                  <Button
+                    disabled={loading}
+                    size="large"
+                    type="primary"
+                    htmlType="submit"
+                  >
+                    Готово
+                  </Button>
+                </Form.Item>
+              </Row>
             </Form>
           </Col>
         </Row>

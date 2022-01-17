@@ -7,6 +7,7 @@ import Footer from "./footer";
 import NotFound from "../pages/notFound";
 import Admin from "../pages/admin";
 import RoomWait from "../pages/roomWait";
+import Room from "../pages/room";
 import styled from "styled-components";
 
 const LayoutWrapper = styled(Layout)`
@@ -20,6 +21,7 @@ const LayoutComp = () => (
       <Routes>
         <Route path="/" element={<Admin />} />
         <Route path="/roomWait/:roomId" element={<RoomWait />} />
+        <Route path="/room" element={<Room />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Content>
