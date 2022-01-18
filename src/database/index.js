@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from "firebase/firestore";
 import store from "../store";
 import { addUser } from "../store/user";
 import logger from "../logger";
@@ -23,8 +23,7 @@ const authChangeListener = (auth) =>
     if (user) {
       store.dispatch(addUser(user.uid));
     } else {
-      // User is signed out
-      // ...
+      console.log('exit')
     }
   });
 
@@ -47,6 +46,17 @@ const writeData = ({ path, data }) => {
   });
 };
 
+const deleteData = ({ path }) => {
+  if (!path) return null;
+
+  const firestore = getFirestore();
+  const ref = doc(firestore, path);
+
+  return deleteDoc(ref).catch((e) => {
+    logger(e);
+  });
+};
+
 const listenerData = ({ path, updatedData }) => {
   const firestore = getFirestore();
   const ref = doc(firestore, path);
@@ -63,6 +73,7 @@ const database = {
   reqistry: (auth) => reqistry(auth),
   writeData,
   listenerData,
+  deleteData,
 };
 
 export default database;

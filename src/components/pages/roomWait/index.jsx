@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { Button, Input, Col, Row, Divider } from "antd";
+import { Button, Input, Col, Row, Divider, List } from "antd";
 import { useNavigate } from "react-router-dom";
 import database from "../../../database";
 import { addMember } from "../../../store/user";
 import styled from "styled-components";
+import UserModal from "../../userModal";
+import useFetchData from "../../../hooks/useFetchData";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -14,12 +16,13 @@ const SpaceVertical = styled.div`
 const RoomWait = () => {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const [users, setUsers] = useState([]);
+  const users = useSelector((state) => state.users);
+
   const [start, setStart] = useState(false);
   const { roomId } = useParams();
   const navigate = useNavigate();
   const isAdmin = user.uid === roomId;
-  const userCount = users ? Object.keys(users).length : 0;
+  const userCount = users.data ? Object.keys(users.data).length : 0;
   const inputCopy = useRef(null);
 
   const onStart = () => {
@@ -30,22 +33,21 @@ const RoomWait = () => {
   };
 
   const updatedData = (newData) => {
-    setUsers(newData.users);
     setStart(newData.start);
   };
 
-  useEffect(() => {
-    database.listenerData({ path: `rooms/${roomId}`, updatedData });
-  }, []);
+  useFetchData({ updateCallback: updatedData });
 
   useEffect(() => {
     if (start) {
-      navigate("/room", { replace: true });
+      navigate(`/room/${roomId}`, { replace: true });
     }
   }, [start]);
 
   useEffect(() => {
-    if (!isAdmin) {
+    if (!users.loaded) return;
+
+    if (!users.data?.[user.uid]) {
       database
         .writeData({
           path: `rooms/${roomId}`,
@@ -53,6 +55,9 @@ const RoomWait = () => {
             users: {
               [user.uid]: {
                 id: user.uid,
+                name: "",
+                lastName: "",
+                ideas: [],
               },
             },
           },
@@ -61,7 +66,7 @@ const RoomWait = () => {
           dispatch(addMember());
         });
     }
-  }, [isAdmin]);
+  }, [user, users]);
 
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -72,6 +77,7 @@ const RoomWait = () => {
 
   return (
     <>
+      <UserModal />
       <Divider>Ожидаем участников</Divider>
       <SpaceVertical>
         <Row justify="center">
@@ -86,14 +92,27 @@ const RoomWait = () => {
         </Row>
       </SpaceVertical>
       <SpaceVertical>
-        <Row justify="center">
-          Количество подключенных: {users ? Object.keys(users).length : 0}
-        </Row>
+        <Row justify="center">Количество подключенных: {userCount}</Row>
       </SpaceVertical>
+      {users.data && (
+        <SpaceVertical>
+          <Row justify="center">
+            <List
+              bordered
+              dataSource={Object.values(users.data)}
+              renderItem={(item) => (
+                <List.Item>
+                  {item.name} {item.lastName}
+                </List.Item>
+              )}
+            />
+          </Row>
+        </SpaceVertical>
+      )}
       <div>
         <Row justify="center">
           {isAdmin ? (
-            <Button disabled={!userCount} type="primary" onClick={onStart}>
+            <Button disabled={userCount < 2} type="primary" onClick={onStart}>
               Начать
             </Button>
           ) : null}

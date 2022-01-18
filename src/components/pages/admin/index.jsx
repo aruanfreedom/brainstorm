@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { Button, Input, Form, Switch, Divider, Row, Col } from "antd";
+import { Button, InputNumber, Form, Switch, Divider, Row, Col } from "antd";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import database from "../../../database";
 import { addSettings } from "../../../store/user";
-import { prepareDataFetch } from "../../../helpers/prepareDataFetch";
 
 const FormWrapper = styled.div`
   margin-top: 50px;
@@ -24,7 +23,7 @@ const Admin = () => {
       .writeData({
         path: `rooms/${user.uid}`,
         data: {
-          settings: prepareDataFetch(formData),
+          settings: formData,
           adminId: user.uid,
         },
       })
@@ -45,7 +44,12 @@ const Admin = () => {
               name="basic"
               layout="vertical"
               initialValues={{
-                remember: true,
+                timeVoute: 1,
+                countIdea: 1,
+                countRaiting: 1,
+                enableMoreIdea: false,
+                enableLessIdea: false,
+                enableMoreRaiting: false,
               }}
               onFinish={onFinish}
               autoComplete="off"
@@ -60,10 +64,12 @@ const Admin = () => {
                   },
                 ]}
               >
-                <Input
+                <InputNumber
                   type="number"
                   size="large"
-                  maxLength={2}
+                  min={1}
+                  max={60}
+                  defaultValue={1}
                   placeholder="Введите время голосования"
                 />
               </Form.Item>
@@ -78,10 +84,11 @@ const Admin = () => {
                   },
                 ]}
               >
-                <Input
+                <InputNumber
                   size="large"
-                  type="number"
-                  maxLength={2}
+                  min={1}
+                  max={20}
+                  defaultValue={1}
                   placeholder="Введите количество идей"
                 />
               </Form.Item>
@@ -96,10 +103,11 @@ const Admin = () => {
                   },
                 ]}
               >
-                <Input
+                <InputNumber
                   size="large"
-                  type="number"
-                  maxLength={2}
+                  min={1}
+                  max={15}
+                  defaultValue={1}
                   placeholder="Введите количество оценок"
                 />
               </Form.Item>

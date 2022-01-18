@@ -5,7 +5,7 @@ export const userSlice = createSlice({
   initialState: {
     uid: "",
     role: "",
-    settings: {},
+    settings: {}
   },
   reducers: {
     addUser: (state, { payload: uid }) => {
