@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import PropTypes from "prop-types";
 import database from "../../database";
-import { addUsers } from "../../store/users";
+import { addAdminId, addUsers } from "../../store/users";
 
 export const DbContext = React.createContext();
 
@@ -15,6 +15,7 @@ export const DatabaseContext = ({ children }) => {
   const updatedData = (newData) => {
     if (!newData) return null;
     dispatch(addUsers(newData.users));
+    dispatch(addAdminId(newData.adminId));
     setData(newData);
   };
 

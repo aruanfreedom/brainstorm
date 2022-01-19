@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, onSnapshot, deleteDoc, updateDoc } from "firebase/firestore";
 import store from "../store";
 import { addUser } from "../store/user";
 import logger from "../logger";
@@ -57,6 +57,24 @@ const deleteData = ({ path }) => {
   });
 };
 
+const removeFieldObject = ({ path, pathField, data, deleteFieldName }) => {
+  if (!path || !data || !deleteFieldName) return null;
+  const dataField = data[pathField];
+  const firestore = getFirestore();
+  const ref = doc(firestore, path);
+  const result = {[pathField]: {}};
+  
+  Object.keys(dataField).forEach(key => {
+    if (key !== deleteFieldName) {
+      result[pathField] = {...result[pathField], [key]: dataField[key] }
+    }
+  });
+  
+  return updateDoc(ref, result).catch((e) => {
+    logger(e);
+  });
+};
+
 const listenerData = ({ path, updatedData }) => {
   const firestore = getFirestore();
   const ref = doc(firestore, path);
@@ -74,6 +92,7 @@ const database = {
   writeData,
   listenerData,
   deleteData,
+  removeFieldObject
 };
 
 export default database;

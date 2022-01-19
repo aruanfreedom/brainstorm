@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Layout, Button, Row } from "antd";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import database from "../../database";
 
 const Header = styled(Layout.Header)``;
 
@@ -26,6 +28,81 @@ const Exit = styled(Button)`
 const HeaderWrapper = () => {
   const user = useSelector((state) => state.user);
   const users = useSelector((state) => state.users);
+  const navigate = useNavigate();
+
+  const splitIdeas = () => {
+    const ideas = users.data[user.uid].ideas;
+    const result = {};
+    const totalCountIdeas = Math.ceil(
+      ideas.length / Object.keys(users.data).length
+    );
+    let halfNumber = 0;
+
+    if (ideas.length) {
+      Object.keys(users.data).forEach((id) => {
+        if (id !== user.uid) {
+          const value = users.data[id];
+          const halfIdea = [...ideas].splice(halfNumber, totalCountIdeas);
+
+          halfNumber = halfNumber + totalCountIdeas;
+
+          result[id] = {
+            ideas: [...value.ideas, ...halfIdea],
+          };
+        }
+      });
+    }
+    return result;
+  };
+
+  const deleteAll = () => {
+    database
+      .deleteData({
+        path: `rooms/${users.adminId}`,
+      })
+      .then(() => {
+        navigate("/");
+      });
+  };
+
+  useEffect(() => {
+    if (Object.keys(users.data).length === 1) {
+      deleteAll();
+    }
+  }, [users]);
+
+  const deleteUser = () => {
+    if (users.adminId === user.uid) {
+      deleteAll();
+    } else {
+      database
+        .removeFieldObject({
+          path: `rooms/${users.adminId}`,
+          data: { users: users.data },
+          deleteFieldName: user.uid,
+          pathField: "users",
+        })
+        .then(() => {
+          navigate("/");
+        });
+    }
+  };
+
+  const exit = () => {
+    const usersChangedIdeas = splitIdeas();
+
+    console.log(usersChangedIdeas, users.adminId);
+    if (!users.adminId) return null;
+
+    database
+      .writeData({
+        path: `rooms/${users.adminId}`,
+        data: { users: usersChangedIdeas },
+      })
+      .then(() => {
+        deleteUser();
+      });
+  };
 
   return (
     <Header>
@@ -49,7 +126,9 @@ const HeaderWrapper = () => {
         <div>
           <Title>Генерация идей</Title>
         </div>
-        <div>{users.data?.[user.uid]?.name && <Exit>Выйти</Exit>}</div>
+        <div>
+          {users.data?.[user.uid]?.name && <Exit onClick={exit}>Выйти</Exit>}
+        </div>
       </Row>
     </Header>
   );
