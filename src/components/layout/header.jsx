@@ -91,7 +91,6 @@ const HeaderWrapper = () => {
   const exit = () => {
     const usersChangedIdeas = splitIdeas();
 
-    console.log(usersChangedIdeas, users.adminId);
     if (!users.adminId) return null;
 
     database
