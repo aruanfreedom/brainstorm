@@ -13,8 +13,9 @@ const SpaceVertical = styled.div`
 
 const Rating = () => {
   const dbProps = React.useContext(DbContext);
-  const [vote, setVote] = useState(0);
+  const [vote, setVote] = useState(null);
   const users = useSelector((state) => state.users);
+  const currUser = useSelector((state) => state.user);
   const { roomId } = useParams();
   const navigate = useNavigate();
 
@@ -38,14 +39,13 @@ const Rating = () => {
     const findedIdea = Object.values(users.data).find((user) =>
       user.ideas.find((idea) => idea.title === item.title)
     );
-    setVote((state) => state + 1);
+    setVote((state) => (Number.isInteger(state) ? state + 1 : 1));
 
     database.writeData({
       path: `rooms/${roomId}`,
       data: {
         users: {
           [findedIdea.id]: {
-            done: raiting - (vote + 1) === 0,
             ideas: users.data[findedIdea.id].ideas.map((idea) =>
               idea.title === item.title
                 ? { ...idea, raiting: idea.raiting ? idea.raiting + 1 : 1 }
@@ -56,6 +56,24 @@ const Rating = () => {
       },
     });
   };
+
+  useEffect(() => {
+    if (
+      vote === dbProps?.settings?.countRaiting &&
+      dbProps?.users?.[currUser.uid].done === false
+    ) {
+      database.writeData({
+        path: `rooms/${roomId}`,
+        data: {
+          users: {
+            [currUser.uid]: {
+              done: true,
+            },
+          },
+        },
+      });
+    }
+  }, [vote, dbProps]);
 
   return (
     <>

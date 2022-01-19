@@ -21,6 +21,7 @@ const Room = () => {
   const users = useSelector((state) => state.users);
   const { roomId } = useParams();
   const navigate = useNavigate();
+  const values = form.getFieldsValue();
 
   const timeVoute = dbProps?.settings?.timeVoute;
   const ideas = dbProps?.users?.[user.uid]?.ideas;
@@ -41,6 +42,7 @@ const Room = () => {
           return {
             title,
             idea,
+            raiting: 0,
             readers: { ...newIdea.readers, [user.uid]: true },
           };
         }
@@ -117,7 +119,7 @@ const Room = () => {
         <SpaceVertical>Необходимое количество идей: {countIdea}</SpaceVertical>
       </Row>
       <Row justify="center">
-        {newIdea && (
+        {newIdea && values.title && values.idea && (
           <SpaceVertical>
             Идея от{" "}
             <strong>

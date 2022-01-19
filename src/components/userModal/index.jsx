@@ -22,6 +22,7 @@ const userModal = () => {
             [user.uid]: {
               name,
               lastName,
+              done: false,
             },
           },
         },
