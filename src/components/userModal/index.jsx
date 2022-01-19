@@ -23,6 +23,7 @@ const userModal = () => {
               name,
               lastName,
               done: false,
+              avatarId: Math.random(),
             },
           },
         },

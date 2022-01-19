@@ -18,9 +18,12 @@ export const userSlice = createSlice({
       state.settings = settings;
       state.role = "admin";
     },
+    clearUserData: (state) => {
+      state.settings = {};
+    }
   },
 });
 
-export const { addUser, addSettings, addMember } = userSlice.actions;
+export const { addUser, addSettings, addMember, clearUserData } = userSlice.actions;
 
 export default userSlice.reducer;

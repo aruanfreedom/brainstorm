@@ -5,6 +5,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import database from "../../../database";
 import { DbContext } from "../../Context/db";
+import { clearUserData } from "../../../store/user";
+import { clearUsersData } from "../../../store/users";
+import { useDispatch } from "react-redux";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -19,6 +22,7 @@ const Total = () => {
   const dbProps = React.useContext(DbContext);
   const { roomId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const isAdmin = user.uid === roomId;
 
@@ -35,6 +39,8 @@ const Total = () => {
     if (isDelete) {
       database.deleteData({ path: `rooms/${roomId}` }).then(() => {
         navigate("/");
+        dispatch(clearUserData());
+        dispatch(clearUsersData());
       });
     }
   }, [isDelete]);

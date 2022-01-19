@@ -11,9 +11,13 @@ export const usersSlice = createSlice({
       state.data = users;
       state.loaded = true;
     },
+    clearUsersData: (state) => {
+      state.data = "";
+      state.loaded = false;
+    }
   },
 });
 
-export const { addUsers } = usersSlice.actions;
+export const { addUsers, clearUsersData } = usersSlice.actions;
 
 export default usersSlice.reducer;
