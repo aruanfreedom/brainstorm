@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Button, Input, Col, Row, Divider, List } from "antd";
@@ -7,18 +7,17 @@ import database from "../../../database";
 import { addMember } from "../../../store/user";
 import styled from "styled-components";
 import UserModal from "../../userModal";
-import useFetchData from "../../../hooks/useFetchData";
+import { DbContext } from "../../Context/db";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
 `;
 
 const RoomWait = () => {
+  const dbProps = React.useContext(DbContext);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const users = useSelector((state) => state.users);
-
-  const [start, setStart] = useState(false);
   const { roomId } = useParams();
   const navigate = useNavigate();
   const isAdmin = user.uid === roomId;
@@ -32,17 +31,11 @@ const RoomWait = () => {
     });
   };
 
-  const updatedData = (newData) => {
-    setStart(newData.start);
-  };
-
-  useFetchData({ updateCallback: updatedData });
-
   useEffect(() => {
-    if (start) {
+    if (dbProps?.start) {
       navigate(`/room/${roomId}`, { replace: true });
     }
-  }, [start]);
+  }, [dbProps]);
 
   useEffect(() => {
     if (!users.loaded) return;

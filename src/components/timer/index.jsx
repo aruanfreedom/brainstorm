@@ -19,7 +19,7 @@ const Time = styled.span`
 `;
 
 const Timer = ({ timeVoute = 0, resetTime }) => {
-  const [time, setTime] = useState({ second: 0, minute: 0 });
+  const [time, setTime] = useState({ second: 0, minute: 1 });
 
   useEffect(() => {
     if (timerId) clearInterval(timerId);

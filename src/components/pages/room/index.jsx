@@ -3,20 +3,18 @@ import { Divider, Input, Form, Button, Row } from "antd";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
-import useFetchData from "../../../hooks/useFetchData";
 import Timer from "../../timer";
 import database from "../../../database";
+import { DbContext } from "../../Context/db";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
 `;
 
 const Room = () => {
-  const [timeVoute, setTimeVoute] = useState(0);
-  const [countIdea, setCountIdea] = useState(null);
+  const dbProps = React.useContext(DbContext);
   const [newIdea, setNewIdea] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [ideas, setIdeas] = useState([]);
   const [resetTime, setResetTime] = useState(false);
   const [form] = Form.useForm();
   const user = useSelector((state) => state.user);
@@ -24,15 +22,11 @@ const Room = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
 
-  const updateCallback = (data) => {
-    const { ideas } = data.users[user.uid];
-    const { timeVoute, countIdea } = data.settings;
-    setTimeVoute(timeVoute);
-    setCountIdea(countIdea - ideas.length);
-    setIdeas(ideas);
-  };
-
-  useFetchData({ updateCallback });
+  const timeVoute = dbProps?.settings?.timeVoute;
+  const ideas = dbProps?.users?.[user.uid]?.ideas;
+  const countIdea = ideas
+    ? dbProps?.settings?.countIdea - ideas.length
+    : dbProps?.settings?.countIdea;
 
   const getOwn = (user, ideas, title, idea) => ({
     [user.uid]: {

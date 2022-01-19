@@ -4,35 +4,29 @@ import { Divider, List, Checkbox, Row } from "antd";
 import { useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import Timer from "../../timer";
-import useFetchData from "../../../hooks/useFetchData";
 import database from "../../../database";
+import { DbContext } from "../../Context/db";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
 `;
 
 const Rating = () => {
-  const [timeVoute, setTimeVoute] = useState(0);
-  const [raiting, setRaiting] = useState(0);
+  const dbProps = React.useContext(DbContext);
   const [vote, setVote] = useState(0);
-  const [ideas, setIdeas] = useState([]);
   const users = useSelector((state) => state.users);
   const { roomId } = useParams();
   const navigate = useNavigate();
 
   const getAllIdeas = (users) =>
+    users &&
     Object.values(users)
       .map((item) => item.ideas)
       .flat();
 
-  const updateCallback = (data) => {
-    const { timeVoute, countRaiting } = data.settings;
-    setTimeVoute(timeVoute);
-    setRaiting(countRaiting);
-    setIdeas(getAllIdeas(data.users));
-  };
-
-  useFetchData({ updateCallback });
+  const timeVoute = dbProps?.settings?.timeVoute;
+  const raiting = dbProps?.settings?.countRaiting;
+  const ideas = getAllIdeas(dbProps?.users);
 
   useEffect(() => {
     if (users.loaded && Object.values(users.data).every((user) => user.done)) {

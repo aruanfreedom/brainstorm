@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Divider, List, Row, Button, Modal } from "antd";
 import styled from "styled-components";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import useFetchData from "../../../hooks/useFetchData";
 import database from "../../../database";
+import { DbContext } from "../../Context/db";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -16,8 +16,7 @@ const RowWrapper = styled.div`
 `;
 
 const Total = () => {
-  const [ideas, setIdeas] = useState(null);
-  const [isDelete, setDelete] = useState(null);
+  const dbProps = React.useContext(DbContext);
   const { roomId } = useParams();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -29,13 +28,8 @@ const Total = () => {
       .map((item) => item.ideas)
       .flat();
 
-  const updateCallback = (data) => {
-    if (!data) return null;
-    setIdeas(getAllIdeas(data?.users));
-    setDelete(data.delete);
-  };
-
-  useFetchData({ updateCallback });
+  const ideas = getAllIdeas(dbProps?.users);
+  const isDelete = dbProps?.delete;
 
   useEffect(() => {
     if (isDelete) {
