@@ -11,12 +11,12 @@ const Profile = styled.h1`
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  width: 150px;
+  width: 170px;
 `;
 
 const Title = styled.h1`
   color: #fff;
-  width: 267px;
+  width: 280px;
 `;
 
 const Exit = styled(Button)`
@@ -46,7 +46,9 @@ const HeaderWrapper = () => {
             </Profile>
           </Row>
         </div>
-        <Title>Генерация идей</Title>
+        <div>
+          <Title>Генерация идей</Title>
+        </div>
         <div>{users.data?.[user.uid]?.name && <Exit>Выйти</Exit>}</div>
       </Row>
     </Header>
