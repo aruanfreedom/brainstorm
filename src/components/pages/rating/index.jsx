@@ -80,7 +80,7 @@ const Rating = () => {
       <Divider>Рэйтинг</Divider>
       <Row justify="space-between">
         <SpaceVertical>
-          Время: <Timer timeVoute={timeVoute} resetTime={false} />
+          Время: <Timer timeVoute={timeVoute} />
         </SpaceVertical>
         <SpaceVertical>Очки голосования: {raiting - vote}</SpaceVertical>
       </Row>

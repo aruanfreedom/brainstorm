@@ -20,15 +20,17 @@ const Time = styled.span`
 
 const Timer = ({ timeVoute = 0, resetTime }) => {
   const [time, setTime] = useState({ second: 0, minute: 1 });
+  const [reset, setReset] = useState(resetTime);
 
   useEffect(() => {
     if (timerId) clearInterval(timerId);
     if (!timeVoute) return;
 
-    if (resetTime) {
+    if (resetTime || reset) {
       clearInterval(timerId);
       timerId = null;
       secondLeft = 0;
+      setReset(false);
     }
 
     timerId = setInterval(() => {
@@ -40,7 +42,7 @@ const Timer = ({ timeVoute = 0, resetTime }) => {
     return () => {
       clearInterval(timerId);
     };
-  }, [time, timeVoute]);
+  }, [time, timeVoute, resetTime, reset]);
 
   useEffect(() => {
     if (timerId && time.second === 0 && time.minute === 0) {
@@ -57,7 +59,11 @@ const Timer = ({ timeVoute = 0, resetTime }) => {
 
 Timer.propTypes = {
   timeVoute: PropTypes.number.isRequired,
-  resetTime: PropTypes.bool.isRequired,
+  resetTime: PropTypes.bool,
+};
+
+Timer.defaultProps = {
+  resetTime: false,
 };
 
 export default Timer;
