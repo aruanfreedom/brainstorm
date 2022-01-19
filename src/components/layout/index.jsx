@@ -19,9 +19,7 @@ const LayoutWrapper = styled(Layout)`
 
 const LayoutComp = () => (
   <LayoutWrapper>
-    <DatabaseContext>
-      <Header />
-    </DatabaseContext>
+    <Header />
     <Content>
       <Routes>
         <Route path="/" element={<Admin />} />

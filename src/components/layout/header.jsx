@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
 import { Layout, Button, Row } from "antd";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import database from "../../database";
+import { clearUsersData } from "../../store/users";
 
 const Header = styled(Layout.Header)``;
 
@@ -29,6 +30,7 @@ const HeaderWrapper = () => {
   const user = useSelector((state) => state.user);
   const users = useSelector((state) => state.users);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const splitIdeas = () => {
     const ideas = users.data[user.uid].ideas;
@@ -62,11 +64,13 @@ const HeaderWrapper = () => {
       })
       .then(() => {
         navigate("/");
+        dispatch(clearUsersData());
+        dispatch(clearUsersData());
       });
   };
 
   useEffect(() => {
-    if (Object.keys(users.data).length === 1) {
+    if (users.start && users.data && Object.keys(users.data).length === 1) {
       deleteAll();
     }
   }, [users]);
@@ -126,7 +130,9 @@ const HeaderWrapper = () => {
           <Title>Генерация идей</Title>
         </div>
         <div>
-          {users.data?.[user.uid]?.name && <Exit onClick={exit}>Выйти</Exit>}
+          {users.start && users.data?.[user.uid]?.name && (
+            <Exit onClick={exit}>Выйти</Exit>
+          )}
         </div>
       </Row>
     </Header>

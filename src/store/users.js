@@ -18,10 +18,13 @@ export const usersSlice = createSlice({
     },
     addAdminId: (state, { payload: id }) => {
       state.adminId = id;
+    },
+    addStart: (state, { payload: start }) => {
+      state.start = start;
     }
   },
 });
 
-export const { addUsers, clearUsersData, addAdminId } = usersSlice.actions;
+export const { addUsers, clearUsersData, addAdminId, addStart } = usersSlice.actions;
 
 export default usersSlice.reducer;
