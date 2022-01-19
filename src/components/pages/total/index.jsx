@@ -56,10 +56,17 @@ const Total = () => {
   const onExport = () => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      ideas.map((item) => [item.title, item.idea].join(",")).join("\n");
+      ideas
+        .map((item) => [item.title, item.idea, item.raiting].join(","))
+        .join("\n");
 
     const encodedUri = encodeURI(csvContent);
-    window.open(encodedUri);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "brainstorm.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
