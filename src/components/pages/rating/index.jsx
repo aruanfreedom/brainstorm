@@ -24,7 +24,7 @@ const Rating = () => {
       .map((item) => item.ideas)
       .flat();
 
-  const timeVoute = dbProps?.settings?.timeVoute;
+  const timeVoute = dbProps?.settings?.timeVoute || 1;
   const raiting = dbProps?.settings?.countRaiting;
   const ideas = getAllIdeas(dbProps?.users);
 

@@ -54,6 +54,7 @@ const Room = () => {
 
     setResetTime(true);
     setLoading(true);
+    form.resetFields();
     database
       .writeData({
         path: `rooms/${roomId}`,
@@ -64,7 +65,6 @@ const Room = () => {
         },
       })
       .finally(() => {
-        form.resetFields();
         setLoading(loading);
         setResetTime(false);
       });
@@ -105,7 +105,7 @@ const Room = () => {
         }
       });
     }
-  }, [countIdea, users]);
+  }, [countIdea, users, form, newIdea, setNewIdea]);
 
   return (
     <>
