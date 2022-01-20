@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Layout, Button, Row } from "antd";
 import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import database from "../../database";
-import { clearUsersData } from "../../store/users";
+import { useDelete } from "../../hooks/useDelete";
 
 const Header = styled(Layout.Header)``;
 
@@ -29,8 +28,7 @@ const Exit = styled(Button)`
 const HeaderWrapper = () => {
   const user = useSelector((state) => state.user);
   const users = useSelector((state) => state.users);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { deleteUser } = useDelete();
 
   const splitIdeas = () => {
     const ideas = users.data[user.uid].ideas;
@@ -55,41 +53,6 @@ const HeaderWrapper = () => {
       });
     }
     return result;
-  };
-
-  const deleteAll = () => {
-    database
-      .deleteData({
-        path: `rooms/${users.adminId}`,
-      })
-      .then(() => {
-        navigate("/");
-        dispatch(clearUsersData());
-        dispatch(clearUsersData());
-      });
-  };
-
-  useEffect(() => {
-    if (users.start && users.data && Object.keys(users.data).length === 1) {
-      deleteAll();
-    }
-  }, [users]);
-
-  const deleteUser = () => {
-    if (users.adminId === user.uid) {
-      deleteAll();
-    } else {
-      database
-        .removeFieldObject({
-          path: `rooms/${users.adminId}`,
-          data: { users: users.data },
-          deleteFieldName: user.uid,
-          pathField: "users",
-        })
-        .then(() => {
-          navigate("/");
-        });
-    }
   };
 
   const exit = () => {

@@ -1,13 +1,11 @@
 import React, { useEffect } from "react";
 import { Divider, List, Row, Button, Modal } from "antd";
 import styled from "styled-components";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import database from "../../../database";
 import { DbContext } from "../../Context/db";
-import { clearUserData } from "../../../store/user";
-import { clearUsersData } from "../../../store/users";
-import { useDispatch } from "react-redux";
+import { useDelete } from "../../../hooks/useDelete";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -21,9 +19,8 @@ const RowWrapper = styled.div`
 const Total = () => {
   const dbProps = React.useContext(DbContext);
   const { roomId } = useParams();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+  const { deleteAll } = useDelete();
   const isAdmin = user.uid === roomId;
 
   const getAllIdeas = (users) =>
@@ -37,11 +34,7 @@ const Total = () => {
 
   useEffect(() => {
     if (isDelete) {
-      database.deleteData({ path: `rooms/${roomId}` }).then(() => {
-        navigate("/");
-        dispatch(clearUserData());
-        dispatch(clearUsersData());
-      });
+      deleteAll();
     }
   }, [isDelete]);
 
