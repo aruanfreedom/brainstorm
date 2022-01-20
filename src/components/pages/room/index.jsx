@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Divider, Input, Form, Button, Row } from "antd";
+import React, { useEffect, useState, useMemo } from "react";
+import { Divider, Input, Form, Button, Row, Switch } from "antd";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
@@ -21,6 +21,7 @@ const Room = () => {
   const dbProps = React.useContext(DbContext);
   const [newIdea, setNewIdea] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isMyIdea, setIsMyIdea] = useState(false);
   const [error, setError] = useState("");
   const [resetTime, setResetTime] = useState(false);
   const [form] = Form.useForm();
@@ -32,9 +33,16 @@ const Room = () => {
 
   const timeVoute = dbProps?.settings?.timeVoute;
   const ideas = dbProps?.users?.[user.uid]?.ideas;
-  const countIdea = ideas
-    ? dbProps?.settings?.countIdea - ideas.length
-    : dbProps?.settings?.countIdea;
+
+  const countIdea = useMemo(() => {
+    const currCountIdea = dbProps?.settings?.countIdea - ideas?.length;
+    if (ideas && currCountIdea > 0) {
+      return currCountIdea;
+    }
+    return 0;
+  }, [dbProps, ideas]);
+
+  const enableMoreIdea = dbProps?.settings?.enableMoreIdea;
 
   const getOwn = (user, ideas, title, idea) => ({
     [user.uid]: {
@@ -68,7 +76,7 @@ const Room = () => {
     });
 
   const onFinish = ({ title, idea }) => {
-    const isOwn = countIdea !== 0;
+    const isOwn = isMyIdea ? isMyIdea : countIdea !== 0;
 
     const findSimilarIdea = isOwn && compareIdeas(idea, "idea");
     const findSimilarTitle = isOwn && compareIdeas(title, "title");
@@ -105,7 +113,7 @@ const Room = () => {
   };
 
   useEffect(() => {
-    if (users.loaded && countIdea === 0) {
+    if (users.loaded && countIdea === 0 && !isMyIdea) {
       const result = Object.values(users.data).find((value) => {
         const allReaded = value.ideas.find(
           (idea) =>
@@ -119,10 +127,10 @@ const Room = () => {
         navigate(`/rating/${roomId}`);
       }
     }
-  }, [users, countIdea]);
+  }, [users, countIdea, isMyIdea]);
 
   useEffect(() => {
-    if (users.loaded && countIdea === 0) {
+    if (users.loaded && countIdea === 0 && !isMyIdea) {
       Object.values(users.data).find((value) => {
         if (user.uid !== value.id) {
           const foundIdea = value.ideas.find(
@@ -139,7 +147,14 @@ const Room = () => {
         }
       });
     }
-  }, [countIdea, users, form, newIdea, setNewIdea]);
+  }, [countIdea, users, form, newIdea, setNewIdea, isMyIdea]);
+
+  const addNewIdea = () => {
+    setIsMyIdea(!isMyIdea);
+    setNewIdea(null);
+    setResetTime(true);
+    form.resetFields();
+  };
 
   return (
     <>
@@ -159,7 +174,7 @@ const Room = () => {
             </strong>
           </SpaceVertical>
         )}
-        {countIdea === 0 && !newIdea && (
+        {countIdea === 0 && !newIdea && !isMyIdea && (
           <SpaceVertical>Ожидаем участников</SpaceVertical>
         )}
       </Row>
@@ -188,7 +203,6 @@ const Room = () => {
               placeholder="Введите название"
             />
           </Form.Item>
-
           <Form.Item
             label="Идея"
             name="idea"
@@ -201,6 +215,22 @@ const Room = () => {
           >
             <Input.TextArea size="large" placeholder="Напишите идею" />
           </Form.Item>
+
+          <Row justify="center">
+            {(newIdea || isMyIdea) && enableMoreIdea && (
+              <Form.Item
+                labelCol={{ span: 18 }}
+                label="Добавить еще идею"
+                name="enableMoreIdea"
+              >
+                <Switch
+                  checked={isMyIdea}
+                  defaultChecked={isMyIdea}
+                  onChange={addNewIdea}
+                />
+              </Form.Item>
+            )}
+          </Row>
 
           <Error>{error}</Error>
 
