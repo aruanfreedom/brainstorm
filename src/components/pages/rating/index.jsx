@@ -27,6 +27,7 @@ const Rating = () => {
 
   const timeVoute = dbProps?.settings?.timeVoute || 1;
   const raiting = dbProps?.settings?.countRaiting;
+  const enableMoreRaiting = dbProps?.settings?.enableMoreRaiting;
   const ideas = getAllIdeas(dbProps?.users);
 
   useEffect(() => {
@@ -35,11 +36,13 @@ const Rating = () => {
     }
   }, [users]);
 
-  const onRaiting = (item) => {
+  const onRaiting = (item, e) => {
     const findedIdea = Object.values(users.data).find((user) =>
       user.ideas.find((idea) => idea.title === item.title)
     );
-    setVote((state) => (Number.isInteger(state) ? state + 1 : 1));
+    const checked = e.target.checked ? +1 : -1;
+
+    setVote((state) => (Number.isInteger(state) ? state + checked : 1));
 
     database.writeData({
       path: `rooms/${roomId}`,
@@ -48,7 +51,10 @@ const Rating = () => {
           [findedIdea.id]: {
             ideas: users.data[findedIdea.id].ideas.map((idea) =>
               idea.title === item.title
-                ? { ...idea, raiting: idea.raiting ? idea.raiting + 1 : 1 }
+                ? {
+                    ...idea,
+                    raiting: idea.raiting ? idea.raiting + checked : 1,
+                  }
                 : idea
             ),
           },
@@ -82,7 +88,9 @@ const Rating = () => {
         <SpaceVertical>
           Время: <Timer timeVoute={timeVoute} />
         </SpaceVertical>
-        <SpaceVertical>Очки голосования: {raiting - vote}</SpaceVertical>
+        <SpaceVertical>
+          Очки голосования: {raiting - vote < 0 ? 0 : raiting - vote}
+        </SpaceVertical>
       </Row>
       <List
         bordered
@@ -90,8 +98,8 @@ const Rating = () => {
         renderItem={(item) => (
           <List.Item>
             <Checkbox
-              disabled={raiting - vote === 0}
-              onClick={() => onRaiting(item)}
+              disabled={raiting - vote === 0 && enableMoreRaiting === false}
+              onClick={(e) => onRaiting(item, e)}
             >
               {item.title}
             </Checkbox>
