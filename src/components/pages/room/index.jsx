@@ -6,15 +6,22 @@ import { useParams, useNavigate } from "react-router-dom";
 import Timer from "../../timer";
 import database from "../../../database";
 import { DbContext } from "../../Context/db";
+import { compareProposition } from "../../../helpers/levenstein";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
+`;
+
+const Error = styled.h4`
+  color: red;
+  text-align: center;
 `;
 
 const Room = () => {
   const dbProps = React.useContext(DbContext);
   const [newIdea, setNewIdea] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [resetTime, setResetTime] = useState(false);
   const [form] = Form.useForm();
   const user = useSelector((state) => state.user);
@@ -51,9 +58,34 @@ const Room = () => {
     },
   });
 
+  const compareIdeas = (proposition, key) =>
+    Object.values(users.data).find(({ ideas, id }) => {
+      if (id !== user.uid) {
+        return ideas.find((ideaProps) =>
+          compareProposition(proposition, ideaProps[key])
+        );
+      }
+    });
+
   const onFinish = ({ title, idea }) => {
     const isOwn = countIdea !== 0;
 
+    const findSimilarIdea = isOwn && compareIdeas(idea, "idea");
+    const findSimilarTitle = isOwn && compareIdeas(title, "title");
+
+    if (findSimilarIdea) {
+      return setError(
+        "Ваша идея совпадает с идеей другого участника. Нужно написать без повторов."
+      );
+    }
+
+    if (findSimilarTitle) {
+      return setError(
+        "Ваш заголовок совпадает с заголовком другого участника. Нужно написать без повторов."
+      );
+    }
+
+    setError("");
     setResetTime(true);
     setLoading(true);
     form.resetFields();
@@ -169,6 +201,8 @@ const Room = () => {
           >
             <Input.TextArea size="large" placeholder="Напишите идею" />
           </Form.Item>
+
+          <Error>{error}</Error>
 
           <Row justify="center">
             <Form.Item>
