@@ -60,8 +60,8 @@ export const compareProposition = (proposition1, proposition2) => {
         })
     });
 
-    const lessProposition = Math.max(words1.length, words2.length);
-    const mainProposition = lessProposition === words1.length ? words1 : words2;
+    const moreProposition = Math.max(words1.length, words2.length);
+    const mainProposition = moreProposition === words1.length ? words1 : words2;
     const diffProcent = 100 - ((mainProposition.length - similarWords) * 10);
     return diffProcent > procent;
 }

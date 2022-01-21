@@ -43,6 +43,7 @@ const Room = () => {
   }, [dbProps, ideas]);
 
   const enableMoreIdea = dbProps?.settings?.enableMoreIdea;
+  // const enableLessIdea = dbProps?.settings?.enableLessIdea;
 
   const getOwn = (user, ideas, title, idea) => ({
     [user.uid]: {
@@ -231,6 +232,22 @@ const Room = () => {
               </Form.Item>
             )}
           </Row>
+
+          {/* <Row justify="center">
+            {enableLessIdea && (
+              <Form.Item
+                labelCol={{ span: 18 }}
+                label="Добавить меньше идею"
+                name="enableLessIdea"
+              >
+                <Switch
+                  checked={isMyIdea}
+                  defaultChecked={isMyIdea}
+                  onChange={addNewIdea}
+                />
+              </Form.Item>
+            )}
+          </Row> */}
 
           <Error>{error}</Error>
 
