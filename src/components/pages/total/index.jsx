@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import database from "../../../database";
 import { DbContext } from "../../Context/db";
 import { useDelete } from "../../../hooks/useDelete";
+import ThemeBrainstorm from "../../themeBrainstorm";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -72,8 +73,13 @@ const Total = () => {
     <>
       <Divider>Итоги голосования</Divider>
       <SpaceVertical>
-        {isAdmin && <Button onClick={onComplete}>Завершить</Button>}
-        <Button onClick={onExport}>Экспорт</Button>
+        <Row justify="space-between">
+          <ThemeBrainstorm />
+          <div>
+            <Button onClick={onExport}>Экспорт</Button>
+            {isAdmin && <Button onClick={onComplete}>Завершить</Button>}
+          </div>
+        </Row>
       </SpaceVertical>
       <SpaceVertical>
         {ideas && (

@@ -6,6 +6,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Timer from "../../timer";
 import database from "../../../database";
 import { DbContext } from "../../Context/db";
+import ThemeBrainstorm from "../../themeBrainstorm";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -87,6 +88,9 @@ const Rating = () => {
       <Row justify="space-between">
         <SpaceVertical>
           Время: <Timer timeVoute={timeVoute} />
+        </SpaceVertical>
+        <SpaceVertical>
+          <ThemeBrainstorm />
         </SpaceVertical>
         <SpaceVertical>
           Очки голосования: {raiting - vote < 0 ? 0 : raiting - vote}

@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Button, InputNumber, Form, Switch, Divider, Row, Col } from "antd";
+import {
+  Button,
+  InputNumber,
+  Input,
+  Form,
+  Switch,
+  Divider,
+  Row,
+  Col,
+} from "antd";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -44,6 +53,7 @@ const Admin = () => {
               name="basic"
               layout="vertical"
               initialValues={{
+                titleBrainstrom: "",
                 timeVoute: 1,
                 countIdea: 1,
                 countRaiting: 1,
@@ -54,6 +64,23 @@ const Admin = () => {
               onFinish={onFinish}
               autoComplete="off"
             >
+              <Form.Item
+                label="Тема мозгового штурма"
+                name="titleBrainstrom"
+                rules={[
+                  {
+                    required: true,
+                    message: "Это поле обязательна",
+                  },
+                ]}
+                wrapperCol={{ span: 20 }}
+              >
+                <Input
+                  size="large"
+                  placeholder="Введите тему мозгового шторма"
+                />
+              </Form.Item>
+
               <Form.Item
                 label="Время голосования (в минутах)"
                 name="timeVoute"
@@ -113,7 +140,7 @@ const Admin = () => {
               </Form.Item>
 
               <Form.Item label="Разрешить меньше идей" name="enableMoreIdea">
-                <Switch defaultChecked={false} />
+                <Switch />
               </Form.Item>
 
               <Form.Item label="Разрешить больше идей" name="enableLessIdea">

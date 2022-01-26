@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import database from "../../database";
 import { addAdminId, addStart, addUsers } from "../../store/users";
 
-export const DbContext = React.createContext();
+export const DbContext = React.createContext("db");
 
 export const DatabaseContext = ({ children }) => {
   const [data, setData] = useState(null);
