@@ -39,7 +39,7 @@ const Admin = () => {
       <Divider>Введите данные для создания комнаты идей</Divider>
       <FormWrapper>
         <Row justify="center">
-          <Col span={8}>
+          <Col span={10}>
             <Form
               name="basic"
               layout="vertical"

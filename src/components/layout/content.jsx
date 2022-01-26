@@ -9,8 +9,10 @@ const Content = styled(Layout.Content)`
   border-radius: 7px;
   background-color: #fff;
   padding: 20px 45px;
-  margin: 45px;
   height: 100%;
+  width: 100%;
+  max-width: 900px;
+  margin: 45px auto;
 `;
 
 const ContentWrapper = ({ children }) => {
