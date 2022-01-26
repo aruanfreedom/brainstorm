@@ -4,6 +4,9 @@ import styled from "styled-components";
 
 const Footer = styled(Layout.Footer)`
   text-align: center;
+  position absolute;
+  bottom: 0;
+  width: 100%;
 `;
 
 const FooterWrapper = () => (

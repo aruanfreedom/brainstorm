@@ -8,7 +8,7 @@ import "antd/dist/antd.css";
 import "./index.css";
 
 const App = () => {
-  return (
+    return (
     <Provider store={store}>
       <BrowserRouter>
         <LayoutWrapper />

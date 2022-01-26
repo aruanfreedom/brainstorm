@@ -11,7 +11,6 @@ const Content = styled(Layout.Content)`
   padding: 20px 45px;
   margin: 45px;
   height: 100%;
-  min-height: 540px;
 `;
 
 const ContentWrapper = ({ children }) => {

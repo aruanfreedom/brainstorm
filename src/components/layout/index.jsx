@@ -15,6 +15,8 @@ import Total from "../pages/total";
 
 const LayoutWrapper = styled(Layout)`
   height: 100%;
+  min-height: 100vh;
+  position: relative;
 `;
 
 const LayoutComp = () => (
