@@ -52,7 +52,9 @@ const Room = () => {
   const enableMoreIdea = dbProps?.settings?.enableMoreIdea;
   const enableLessIdea = dbProps?.settings?.enableLessIdea;
   const disabledBtnAdd = !enableLessIdea && !enableMoreIdea && countIdea === 0;
-  const disabledBtnSend = countIdea > 0 || userReady;
+  const ignoreCountIdea = enableLessIdea ? false : countIdea > 0;
+  const disabledBtnSend =
+    ownIdeas?.length === 0 || ignoreCountIdea || userReady;
   const waitOthers = countIdea === 0 && !allReady && userReady;
 
   const compareIdeas = (proposition) =>
