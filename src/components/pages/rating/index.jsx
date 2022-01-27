@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Divider, List, Checkbox, Row } from "antd";
 import { useSelector } from "react-redux";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Timer from "../../timer";
 import database from "../../../database";
 import { DbContext } from "../../Context/db";
@@ -16,27 +16,14 @@ const Rating = () => {
   const dbProps = React.useContext(DbContext);
   const [vote, setVote] = useState(null);
   const users = useSelector((state) => state.users);
-  const currUser = useSelector((state) => state.user);
   const { roomId } = useParams();
-  const navigate = useNavigate();
-
-  const getAllIdeas = (users) =>
-    users &&
-    Object.values(users)
-      .map((item) => item.ideas)
-      .flat();
 
   const timeVoute = dbProps?.settings?.timeVoute || 1;
   const raiting = dbProps?.settings?.countRaiting;
   const enableMoreRaiting = dbProps?.settings?.enableMoreRaiting;
-  const ideas = getAllIdeas(dbProps?.users);
-
-  useEffect(() => {
-    if (users.loaded && Object.values(users.data).every((user) => user.done)) {
-      navigate(`/total/${roomId}`);
-    }
-  }, [users]);
-
+  const sheetNumber = dbProps?.sheetNumber;
+  const ideas = dbProps?.sheets?.[sheetNumber];
+  console.log(sheetNumber, ideas);
   const onRaiting = (item, e) => {
     const findedIdea = Object.values(users.data).find((user) =>
       user.ideas.find((idea) => idea.title === item.title)
@@ -64,24 +51,6 @@ const Rating = () => {
     });
   };
 
-  useEffect(() => {
-    if (
-      vote === dbProps?.settings?.countRaiting &&
-      dbProps?.users?.[currUser.uid].done === false
-    ) {
-      database.writeData({
-        path: `rooms/${roomId}`,
-        data: {
-          users: {
-            [currUser.uid]: {
-              done: true,
-            },
-          },
-        },
-      });
-    }
-  }, [vote, dbProps]);
-
   return (
     <>
       <Divider>Рэйтинг</Divider>
@@ -105,7 +74,7 @@ const Rating = () => {
               disabled={raiting - vote === 0 && enableMoreRaiting === false}
               onClick={(e) => onRaiting(item, e)}
             >
-              {item.title}
+              {item.idea}
             </Checkbox>
           </List.Item>
         )}

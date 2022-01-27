@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 import Timer from "../../timer";
 import database from "../../../database";
 import { DbContext } from "../../Context/db";
-// import { compareProposition } from "../../../helpers/levenstein";
+import { compareProposition } from "../../../helpers/levenstein";
 import ThemeBrainstorm from "../../themeBrainstorm";
 
 const SpaceVertical = styled.div`
@@ -16,6 +16,7 @@ const SpaceVertical = styled.div`
 const Error = styled.h4`
   color: red;
   text-align: center;
+  margin-left: 127px;
 `;
 
 const Room = () => {
@@ -27,11 +28,12 @@ const Room = () => {
   const user = useSelector((state) => state.user);
   const users = dbProps?.users;
   const { roomId } = useParams();
-  // const values = form.getFieldsValue();
 
   const timeVoute = dbProps?.settings?.timeVoute;
   const sheetNumber = dbProps?.sheetNumber || 0;
-  const currentSheets = dbProps?.sheets?.[sheetNumber];
+  const sheets = dbProps?.sheets;
+  const currentSheets = sheets?.[sheetNumber];
+
   const allReady = users && Object.values(users).every(({ done }) => done);
   const userReady = users?.[user.uid]?.done;
 
@@ -53,32 +55,27 @@ const Room = () => {
   const disabledBtnSend = countIdea > 0 || userReady;
   const waitOthers = countIdea === 0 && !allReady && userReady;
 
-  // const compareIdeas = (proposition, key) =>
-  //   Object.values(users.data).find(({ ideas, id }) => {
-  //     if (id !== user.uid) {
-  //       return ideas.find((ideaProps) =>
-  //         compareProposition(proposition, ideaProps[key])
-  //       );
-  //     }
-  //   });
+  const compareIdeas = (proposition) =>
+    sheets &&
+    Object.values(sheets).find((ideas) =>
+      ideas.find(({ idea }) => compareProposition(proposition, idea))
+    );
 
   const onFinish = ({ idea }) => {
-    // const isOwn = isMyIdea ? isMyIdea : countIdea !== 0;
+    const findSimilarIdea = compareIdeas(idea);
 
-    // const findSimilarIdea = isOwn && compareIdeas(idea, "idea");
-
-    // if (findSimilarIdea) {
-    //   return setError(
-    //     "Ваша идея совпадает с идеей другого участника. Нужно написать без повторов."
-    //   );
-    // }
+    if (findSimilarIdea) {
+      return setError(
+        "Ваша идея совпадает с идеей другого участника. Нужно написать без повторов."
+      );
+    }
 
     setError("");
     setResetTime(true);
     setLoading(true);
     form.resetFields();
 
-    const sheet = dbProps?.sheets?.[sheetNumber]?.length
+    const sheet = sheets?.[sheetNumber]?.length
       ? [...dbProps.sheets[sheetNumber]]
       : [];
 
@@ -98,17 +95,17 @@ const Room = () => {
       });
   };
 
-  useEffect(() => {
-    if (allReady && users && sheetNumber === Object.keys(users).length) {
+  const nextStep = () => {
+    if (sheetNumber === Object.keys(users).length - 1) {
       database.writeData({
         path: `rooms/${roomId}`,
-        data: { step: 3 },
+        data: { step: 3, sheetNumber: 0 },
       });
     }
-  }, [allReady, sheetNumber, users]);
+  };
 
   useEffect(() => {
-    if (allReady) {
+    if (allReady && users) {
       database
         .writeData({
           path: `rooms/${roomId}`,
@@ -119,49 +116,13 @@ const Room = () => {
             sheetNumber: sheetNumber + 1,
           },
         })
+        .then(() => nextStep())
         .finally(() => {
           setLoading(loading);
           setResetTime(false);
         });
     }
   }, [allReady, sheetNumber, users]);
-
-  // useEffect(() => {
-  //   if (users.loaded && countIdea === 0 && !isMyIdea) {
-  //     const result = Object.values(users.data).find((value) => {
-  //       const allReaded = value.ideas.find(
-  //         (idea) =>
-  //           Object.keys(idea.readers)?.length !==
-  //           Object.keys(users.data).length - 1
-  //       );
-
-  //       return allReaded;
-  //     });
-  //     if (!result) {
-  //       navigate(`/rating/${roomId}`);
-  //     }
-  //   }
-  // }, [users, countIdea, isMyIdea]);
-
-  // useEffect(() => {
-  //   if (users.loaded && countIdea === 0 && !isMyIdea) {
-  //     Object.values(users.data).find((value) => {
-  //       if (user.uid !== value.id) {
-  //         const foundIdea = value.ideas.find(
-  //           (idea) => !idea.readers?.[user.uid]
-  //         );
-
-  //         if (foundIdea) {
-  //           form.setFieldsValue({
-  //             title: foundIdea.title,
-  //             idea: foundIdea.idea,
-  //           });
-  //           setNewIdea(value);
-  //         }
-  //       }
-  //     });
-  //   }
-  // }, [countIdea, users, form, newIdea, setNewIdea, isMyIdea]);
 
   const sendIdeas = () => {
     database
