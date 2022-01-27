@@ -18,37 +18,39 @@ const Time = styled.span`
   color: ${({ color }) => color};
 `;
 
-const Timer = ({ timeVoute = 0, resetTime }) => {
+const Timer = ({ timeVoute, resetTime }) => {
   const [time, setTime] = useState({ second: 0, minute: 1 });
   const [reset, setReset] = useState(resetTime);
 
-  useEffect(() => {
-    if (timerId) clearInterval(timerId);
-    if (!timeVoute) return;
-
+  const clear = () => {
     if (resetTime || reset) {
-      clearInterval(timerId);
+      clearTimeout(timerId);
       timerId = null;
       secondLeft = 0;
       setReset(false);
     }
+  };
 
-    timerId = setInterval(() => {
+  useEffect(() => {
+    if (timerId) clearTimeout(timerId);
+    if (!timeVoute) return;
+
+    clear();
+
+    timerId = setTimeout(() => {
       const clock = timeConvert(Number(timeVoute));
 
-      setTime({ minute: getMinutes(clock), second: getSeconds(clock) });
+      if (time.second === 0 && time.minute === 0) {
+        clearTimeout(timerId);
+      } else {
+        setTime({ minute: getMinutes(clock), second: getSeconds(clock) });
+      }
     }, 1000);
 
     return () => {
-      clearInterval(timerId);
+      clearTimeout(timerId);
     };
   }, [time, timeVoute, resetTime, reset]);
-
-  useEffect(() => {
-    if (timerId && time.second === 0 && time.minute === 0) {
-      clearInterval(timerId);
-    }
-  }, [time]);
 
   return (
     <Time color={time.minute === 0 && time.second < 20 ? "red" : "black"}>
@@ -58,12 +60,13 @@ const Timer = ({ timeVoute = 0, resetTime }) => {
 };
 
 Timer.propTypes = {
-  timeVoute: PropTypes.number.isRequired,
+  timeVoute: PropTypes.number,
   resetTime: PropTypes.bool,
 };
 
 Timer.defaultProps = {
   resetTime: false,
+  timeVoute: 0,
 };
 
 export default Timer;

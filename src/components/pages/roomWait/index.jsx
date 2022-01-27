@@ -94,13 +94,16 @@ const RoomWait = () => {
         </SpaceVertical>
       )}
       <div>
-        <Row justify="center">
-          {isAdmin ? (
-            <Button disabled={userCount < 2} type="primary" onClick={onStart}>
-              Начать
-            </Button>
-          ) : null}
-        </Row>
+        {isAdmin ? (
+          <Button
+            disabled={userCount < 2}
+            type="primary"
+            onClick={onStart}
+            block
+          >
+            Начать
+          </Button>
+        ) : null}
       </div>
     </>
   );

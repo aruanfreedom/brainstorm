@@ -9,13 +9,14 @@ export const useSteps = () => {
   const adminId = useSelector((state) => state.users.adminId);
   const navigation = useNavigate();
 
+  const updatedData = (newData) => {
+    if (!newData) return null;
+    setStep(newData.step);
+  };
+
   useEffect(() => {
     if (adminId) {
-      database.getData({ path: `rooms/${adminId}` }).then((docSnap) => {
-        if (docSnap.exists()) {
-          setStep(docSnap.data().step);
-        }
-      });
+      database.listenerData({ path: `rooms/${adminId}`, updatedData });
     }
   }, [adminId]);
 

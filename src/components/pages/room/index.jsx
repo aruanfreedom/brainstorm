@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from "react";
-import { Divider, Input, Form, Button, Row, Switch } from "antd";
+import React, { useState, useMemo, useEffect } from "react";
+import { Divider, Input, Form, Button, Row, List } from "antd";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import Timer from "../../timer";
 import database from "../../../database";
 import { DbContext } from "../../Context/db";
-import { compareProposition } from "../../../helpers/levenstein";
+// import { compareProposition } from "../../../helpers/levenstein";
 import ThemeBrainstorm from "../../themeBrainstorm";
 
 const SpaceVertical = styled.div`
@@ -20,83 +20,76 @@ const Error = styled.h4`
 
 const Room = () => {
   const dbProps = React.useContext(DbContext);
-  const [newIdea, setNewIdea] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isMyIdea, setIsMyIdea] = useState(false);
   const [error, setError] = useState("");
   const [resetTime, setResetTime] = useState(false);
   const [form] = Form.useForm();
   const user = useSelector((state) => state.user);
-  const users = useSelector((state) => state.users);
+  const users = dbProps?.users;
   const { roomId } = useParams();
-  const values = form.getFieldsValue();
+  // const values = form.getFieldsValue();
 
   const timeVoute = dbProps?.settings?.timeVoute;
-  const ideas = dbProps?.users?.[user.uid]?.ideas;
+  const sheetNumber = dbProps?.sheetNumber || 0;
+  const currentSheets = dbProps?.sheets?.[sheetNumber];
+  const allReady = users && Object.values(users).every(({ done }) => done);
+  const userReady = users?.[user.uid]?.done;
+
+  const ownIdeas = currentSheets
+    ? currentSheets.filter((idea) => idea.id === user.uid)
+    : [];
 
   const countIdea = useMemo(() => {
-    const currCountIdea = dbProps?.settings?.countIdea - ideas?.length;
-    if (ideas && currCountIdea > 0) {
+    const currCountIdea = dbProps?.settings?.countIdea - ownIdeas?.length;
+    if (ownIdeas && currCountIdea > 0) {
       return currCountIdea;
     }
     return 0;
-  }, [dbProps, ideas]);
+  }, [dbProps, ownIdeas]);
 
   const enableMoreIdea = dbProps?.settings?.enableMoreIdea;
-  // const enableLessIdea = dbProps?.settings?.enableLessIdea;
+  const enableLessIdea = dbProps?.settings?.enableLessIdea;
+  const disabledBtnAdd = !enableLessIdea && !enableMoreIdea && countIdea === 0;
+  const disabledBtnSend = countIdea > 0 || userReady;
+  const waitOthers = countIdea === 0 && !allReady && userReady;
 
-  const getOwn = (user, ideas, idea) => ({
-    [user.uid]: {
-      ideas: [...ideas, { idea, readers: {}, raiting: 0 }],
-    },
-  });
+  // const compareIdeas = (proposition, key) =>
+  //   Object.values(users.data).find(({ ideas, id }) => {
+  //     if (id !== user.uid) {
+  //       return ideas.find((ideaProps) =>
+  //         compareProposition(proposition, ideaProps[key])
+  //       );
+  //     }
+  //   });
 
-  const getOther = (newIdea, idea) => ({
-    [newIdea.id]: {
-      ideas: newIdea.ideas.map((newIdea) => {
-        if (!newIdea.readers[user.uid]) {
-          return {
-            idea,
-            raiting: 0,
-            readers: { ...newIdea.readers, [user.uid]: true },
-          };
-        }
-        return newIdea;
-      }),
-    },
-  });
+  const onFinish = ({ idea }) => {
+    // const isOwn = isMyIdea ? isMyIdea : countIdea !== 0;
 
-  const compareIdeas = (proposition, key) =>
-    Object.values(users.data).find(({ ideas, id }) => {
-      if (id !== user.uid) {
-        return ideas.find((ideaProps) =>
-          compareProposition(proposition, ideaProps[key])
-        );
-      }
-    });
+    // const findSimilarIdea = isOwn && compareIdeas(idea, "idea");
 
-  const onFinish = ({ title, idea }) => {
-    const isOwn = isMyIdea ? isMyIdea : countIdea !== 0;
-
-    const findSimilarIdea = isOwn && compareIdeas(idea, "idea");
-
-    if (findSimilarIdea) {
-      return setError(
-        "Ваша идея совпадает с идеей другого участника. Нужно написать без повторов."
-      );
-    }
+    // if (findSimilarIdea) {
+    //   return setError(
+    //     "Ваша идея совпадает с идеей другого участника. Нужно написать без повторов."
+    //   );
+    // }
 
     setError("");
     setResetTime(true);
     setLoading(true);
     form.resetFields();
+
+    const sheet = dbProps?.sheets?.[sheetNumber]?.length
+      ? [...dbProps.sheets[sheetNumber]]
+      : [];
+
     database
       .writeData({
         path: `rooms/${roomId}`,
         data: {
-          users: isOwn
-            ? getOwn(user, ideas, title, idea)
-            : getOther(newIdea, title, idea),
+          sheets: {
+            [sheetNumber]: [...sheet, { id: user.uid, idea }],
+          },
+          sheetNumber,
         },
       })
       .finally(() => {
@@ -104,6 +97,34 @@ const Room = () => {
         setResetTime(false);
       });
   };
+
+  useEffect(() => {
+    if (allReady && users && sheetNumber === Object.keys(users).length) {
+      database.writeData({
+        path: `rooms/${roomId}`,
+        data: { step: 3 },
+      });
+    }
+  }, [allReady, sheetNumber, users]);
+
+  useEffect(() => {
+    if (allReady) {
+      database
+        .writeData({
+          path: `rooms/${roomId}`,
+          data: {
+            users: Object.keys(users).reduce((acc, key) => ({
+              [key]: { done: false },
+            })),
+            sheetNumber: sheetNumber + 1,
+          },
+        })
+        .finally(() => {
+          setLoading(loading);
+          setResetTime(false);
+        });
+    }
+  }, [allReady, sheetNumber, users]);
 
   // useEffect(() => {
   //   if (users.loaded && countIdea === 0 && !isMyIdea) {
@@ -142,11 +163,22 @@ const Room = () => {
   //   }
   // }, [countIdea, users, form, newIdea, setNewIdea, isMyIdea]);
 
-  const addNewIdea = () => {
-    setIsMyIdea(!isMyIdea);
-    setNewIdea(null);
-    setResetTime(true);
-    form.resetFields();
+  const sendIdeas = () => {
+    database
+      .writeData({
+        path: `rooms/${roomId}`,
+        data: {
+          users: {
+            [user.uid]: {
+              done: true,
+            },
+          },
+        },
+      })
+      .finally(() => {
+        setLoading(loading);
+        setResetTime(false);
+      });
   };
 
   return (
@@ -162,18 +194,30 @@ const Room = () => {
         <SpaceVertical>Необходимое количество идей: {countIdea}</SpaceVertical>
       </Row>
       <Row justify="center">
-        {newIdea && values.title && values.idea && (
-          <SpaceVertical>
-            Идея от{" "}
-            <strong>
-              {newIdea.name} {newIdea.lastName}
-            </strong>
-          </SpaceVertical>
-        )}
-        {countIdea === 0 && !newIdea && !isMyIdea && (
-          <SpaceVertical>Ожидаем участников</SpaceVertical>
-        )}
+        {waitOthers && <SpaceVertical>Ожидаем участников</SpaceVertical>}
       </Row>
+      <div>
+        <SpaceVertical>
+          <List
+            size="small"
+            footer={
+              <Row justify="center">
+                <Button
+                  disabled={disabledBtnSend}
+                  size="large"
+                  type="primary"
+                  onClick={sendIdeas}
+                >
+                  Отправить идей
+                </Button>
+              </Row>
+            }
+            bordered
+            dataSource={ownIdeas}
+            renderItem={(item) => <List.Item>{item.idea}</List.Item>}
+          />
+        </SpaceVertical>
+      </div>
       <div>
         <Form
           name="basic"
@@ -196,52 +240,19 @@ const Room = () => {
             <Input.TextArea size="large" placeholder="Напишите идею" />
           </Form.Item>
 
-          <Row justify="center">
-            {(newIdea || isMyIdea) && enableMoreIdea && (
-              <Form.Item
-                labelCol={{ span: 18 }}
-                label="Добавить еще идею"
-                name="enableMoreIdea"
-              >
-                <Switch
-                  checked={isMyIdea}
-                  defaultChecked={isMyIdea}
-                  onChange={addNewIdea}
-                />
-              </Form.Item>
-            )}
-          </Row>
-
-          {/* <Row justify="center">
-            {enableLessIdea && (
-              <Form.Item
-                labelCol={{ span: 18 }}
-                label="Добавить меньше идею"
-                name="enableLessIdea"
-              >
-                <Switch
-                  checked={isMyIdea}
-                  defaultChecked={isMyIdea}
-                  onChange={addNewIdea}
-                />
-              </Form.Item>
-            )}
-          </Row> */}
-
           <Error>{error}</Error>
 
-          <Row justify="center">
-            <Form.Item>
-              <Button
-                disabled={loading}
-                size="large"
-                type="primary"
-                htmlType="submit"
-              >
-                Подтвердить
-              </Button>
-            </Form.Item>
-          </Row>
+          <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
+            <Button
+              disabled={disabledBtnAdd}
+              size="large"
+              type="primary"
+              htmlType="submit"
+              block
+            >
+              Добавить идею
+            </Button>
+          </Form.Item>
         </Form>
       </div>
     </>
