@@ -1,12 +1,13 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Divider, Input, Form, Button, Row, Switch } from "antd";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Timer from "../../timer";
 import database from "../../../database";
 import { DbContext } from "../../Context/db";
 import { compareProposition } from "../../../helpers/levenstein";
+import ThemeBrainstorm from "../../themeBrainstorm";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -28,7 +29,6 @@ const Room = () => {
   const user = useSelector((state) => state.user);
   const users = useSelector((state) => state.users);
   const { roomId } = useParams();
-  const navigate = useNavigate();
   const values = form.getFieldsValue();
 
   const timeVoute = dbProps?.settings?.timeVoute;
@@ -45,18 +45,17 @@ const Room = () => {
   const enableMoreIdea = dbProps?.settings?.enableMoreIdea;
   // const enableLessIdea = dbProps?.settings?.enableLessIdea;
 
-  const getOwn = (user, ideas, title, idea) => ({
+  const getOwn = (user, ideas, idea) => ({
     [user.uid]: {
-      ideas: [...ideas, { title, idea, readers: {}, raiting: 0 }],
+      ideas: [...ideas, { idea, readers: {}, raiting: 0 }],
     },
   });
 
-  const getOther = (newIdea, title, idea) => ({
+  const getOther = (newIdea, idea) => ({
     [newIdea.id]: {
       ideas: newIdea.ideas.map((newIdea) => {
-        if (newIdea.title === title) {
+        if (!newIdea.readers[user.uid]) {
           return {
-            title,
             idea,
             raiting: 0,
             readers: { ...newIdea.readers, [user.uid]: true },
@@ -80,17 +79,10 @@ const Room = () => {
     const isOwn = isMyIdea ? isMyIdea : countIdea !== 0;
 
     const findSimilarIdea = isOwn && compareIdeas(idea, "idea");
-    const findSimilarTitle = isOwn && compareIdeas(title, "title");
 
     if (findSimilarIdea) {
       return setError(
         "Ваша идея совпадает с идеей другого участника. Нужно написать без повторов."
-      );
-    }
-
-    if (findSimilarTitle) {
-      return setError(
-        "Ваш заголовок совпадает с заголовком другого участника. Нужно написать без повторов."
       );
     }
 
@@ -113,42 +105,42 @@ const Room = () => {
       });
   };
 
-  useEffect(() => {
-    if (users.loaded && countIdea === 0 && !isMyIdea) {
-      const result = Object.values(users.data).find((value) => {
-        const allReaded = value.ideas.find(
-          (idea) =>
-            Object.keys(idea.readers)?.length !==
-            Object.keys(users.data).length - 1
-        );
+  // useEffect(() => {
+  //   if (users.loaded && countIdea === 0 && !isMyIdea) {
+  //     const result = Object.values(users.data).find((value) => {
+  //       const allReaded = value.ideas.find(
+  //         (idea) =>
+  //           Object.keys(idea.readers)?.length !==
+  //           Object.keys(users.data).length - 1
+  //       );
 
-        return allReaded;
-      });
-      if (!result) {
-        navigate(`/rating/${roomId}`);
-      }
-    }
-  }, [users, countIdea, isMyIdea]);
+  //       return allReaded;
+  //     });
+  //     if (!result) {
+  //       navigate(`/rating/${roomId}`);
+  //     }
+  //   }
+  // }, [users, countIdea, isMyIdea]);
 
-  useEffect(() => {
-    if (users.loaded && countIdea === 0 && !isMyIdea) {
-      Object.values(users.data).find((value) => {
-        if (user.uid !== value.id) {
-          const foundIdea = value.ideas.find(
-            (idea) => !idea.readers?.[user.uid]
-          );
+  // useEffect(() => {
+  //   if (users.loaded && countIdea === 0 && !isMyIdea) {
+  //     Object.values(users.data).find((value) => {
+  //       if (user.uid !== value.id) {
+  //         const foundIdea = value.ideas.find(
+  //           (idea) => !idea.readers?.[user.uid]
+  //         );
 
-          if (foundIdea) {
-            form.setFieldsValue({
-              title: foundIdea.title,
-              idea: foundIdea.idea,
-            });
-            setNewIdea(value);
-          }
-        }
-      });
-    }
-  }, [countIdea, users, form, newIdea, setNewIdea, isMyIdea]);
+  //         if (foundIdea) {
+  //           form.setFieldsValue({
+  //             title: foundIdea.title,
+  //             idea: foundIdea.idea,
+  //           });
+  //           setNewIdea(value);
+  //         }
+  //       }
+  //     });
+  //   }
+  // }, [countIdea, users, form, newIdea, setNewIdea, isMyIdea]);
 
   const addNewIdea = () => {
     setIsMyIdea(!isMyIdea);
@@ -163,6 +155,9 @@ const Room = () => {
       <Row justify="space-between">
         <SpaceVertical>
           Время: <Timer timeVoute={timeVoute} resetTime={resetTime} />
+        </SpaceVertical>
+        <SpaceVertical>
+          <ThemeBrainstorm />
         </SpaceVertical>
         <SpaceVertical>Необходимое количество идей: {countIdea}</SpaceVertical>
       </Row>
@@ -188,22 +183,6 @@ const Room = () => {
           onFinish={onFinish}
           autoComplete="off"
         >
-          <Form.Item
-            label="Название"
-            name="title"
-            rules={[
-              {
-                required: true,
-                message: "Это поле обязательна",
-              },
-            ]}
-          >
-            <Input
-              disabled={newIdea}
-              size="large"
-              placeholder="Введите название"
-            />
-          </Form.Item>
           <Form.Item
             label="Идея"
             name="idea"

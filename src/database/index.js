@@ -1,6 +1,14 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, setDoc, onSnapshot, deleteDoc, updateDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  onSnapshot,
+  deleteDoc,
+  updateDoc,
+} from "firebase/firestore";
 import store from "../store";
 import { addUser } from "../store/user";
 import logger from "../logger";
@@ -23,7 +31,7 @@ const authChangeListener = (auth) =>
     if (user) {
       store.dispatch(addUser(user.uid));
     } else {
-      console.log('exit')
+      console.log("exit");
     }
   });
 
@@ -33,7 +41,7 @@ const reqistry = (auth) => {
   signInAnonymously(auth)
     .catch((error) => logger(error))
     .finally(() => store.dispatch(hideMainLoader()));
-}
+};
 
 const writeData = ({ path, data }) => {
   if (!path || !data) return null;
@@ -42,6 +50,17 @@ const writeData = ({ path, data }) => {
   const ref = doc(firestore, path);
 
   return setDoc(ref, data, { merge: true }).catch((e) => {
+    logger(e);
+  });
+};
+
+const getData = ({ path }) => {
+  if (!path) return null;
+
+  const firestore = getFirestore();
+  const ref = doc(firestore, path);
+
+  return getDoc(ref).catch((e) => {
     logger(e);
   });
 };
@@ -62,14 +81,14 @@ const removeFieldObject = ({ path, pathField, data, deleteFieldName }) => {
   const dataField = data[pathField];
   const firestore = getFirestore();
   const ref = doc(firestore, path);
-  const result = {[pathField]: {}};
-  
-  Object.keys(dataField).forEach(key => {
+  const result = { [pathField]: {} };
+
+  Object.keys(dataField).forEach((key) => {
     if (key !== deleteFieldName) {
-      result[pathField] = {...result[pathField], [key]: dataField[key] }
+      result[pathField] = { ...result[pathField], [key]: dataField[key] };
     }
   });
-  
+
   return updateDoc(ref, result).catch((e) => {
     logger(e);
   });
@@ -82,17 +101,18 @@ const listenerData = ({ path, updatedData }) => {
   onSnapshot(ref, (doc) => {
     updatedData(doc.data());
   });
-}
+};
 
 const database = {
   auth: () => getAuth(),
   init,
-  authChangeListener: (auth) => authChangeListener(auth),
-  reqistry: (auth) => reqistry(auth),
+  authChangeListener,
+  reqistry,
   writeData,
+  getData,
   listenerData,
   deleteData,
-  removeFieldObject
+  removeFieldObject,
 };
 
 export default database;

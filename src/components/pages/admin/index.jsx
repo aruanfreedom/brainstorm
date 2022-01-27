@@ -10,10 +10,10 @@ import {
   Col,
 } from "antd";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import database from "../../../database";
 import { addSettings } from "../../../store/user";
+import { addAdminId } from "../../../store/users";
 
 const FormWrapper = styled.div`
   margin-top: 50px;
@@ -21,7 +21,6 @@ const FormWrapper = styled.div`
 
 const Admin = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.user);
 
@@ -34,11 +33,12 @@ const Admin = () => {
         data: {
           settings: formData,
           adminId: user.uid,
+          step: 1,
         },
       })
       .then(() => {
         dispatch(addSettings(formData));
-        navigate(`roomWait/${user.uid}`);
+        dispatch(addAdminId(user.uid));
       })
       .finally(() => setLoading(false));
   };
@@ -154,18 +154,17 @@ const Admin = () => {
                 <Switch />
               </Form.Item>
 
-              <Row justify="center">
-                <Form.Item>
-                  <Button
-                    disabled={loading}
-                    size="large"
-                    type="primary"
-                    htmlType="submit"
-                  >
-                    Готово
-                  </Button>
-                </Form.Item>
-              </Row>
+              <Form.Item>
+                <Button
+                  disabled={loading}
+                  size="large"
+                  type="primary"
+                  htmlType="submit"
+                  block
+                >
+                  Готово
+                </Button>
+              </Form.Item>
             </Form>
           </Col>
         </Row>

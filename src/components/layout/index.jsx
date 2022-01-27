@@ -12,6 +12,7 @@ import RoomWait from "../pages/roomWait";
 import Room from "../pages/room";
 import Rating from "../pages/rating";
 import Total from "../pages/total";
+import { useSteps } from "../../hooks/useSteps";
 
 const LayoutWrapper = styled(Layout)`
   height: 100%;
@@ -19,49 +20,52 @@ const LayoutWrapper = styled(Layout)`
   position: relative;
 `;
 
-const LayoutComp = () => (
-  <LayoutWrapper>
-    <Header />
-    <Content>
-      <Routes>
-        <Route path="/" element={<Admin />} />
-        <Route
-          path="/roomWait/:roomId"
-          element={
-            <DatabaseContext>
-              <RoomWait />
-            </DatabaseContext>
-          }
-        />
-        <Route
-          path="/room/:roomId"
-          element={
-            <DatabaseContext>
-              <Room />
-            </DatabaseContext>
-          }
-        />
-        <Route
-          path="/rating/:roomId"
-          element={
-            <DatabaseContext>
-              <Rating />
-            </DatabaseContext>
-          }
-        />
-        <Route
-          path="/total/:roomId"
-          element={
-            <DatabaseContext>
-              <Total />
-            </DatabaseContext>
-          }
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Content>
-    <Footer />
-  </LayoutWrapper>
-);
+const LayoutComp = () => {
+  useSteps();
+  return (
+    <LayoutWrapper>
+      <Header />
+      <Content>
+        <Routes>
+          <Route path="/" element={<Admin />} />
+          <Route
+            path="/roomWait/:roomId"
+            element={
+              <DatabaseContext>
+                <RoomWait />
+              </DatabaseContext>
+            }
+          />
+          <Route
+            path="/room/:roomId"
+            element={
+              <DatabaseContext>
+                <Room />
+              </DatabaseContext>
+            }
+          />
+          <Route
+            path="/rating/:roomId"
+            element={
+              <DatabaseContext>
+                <Rating />
+              </DatabaseContext>
+            }
+          />
+          <Route
+            path="/total/:roomId"
+            element={
+              <DatabaseContext>
+                <Total />
+              </DatabaseContext>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Content>
+      <Footer />
+    </LayoutWrapper>
+  );
+};
 
 export default LayoutComp;
