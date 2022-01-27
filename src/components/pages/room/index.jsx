@@ -51,7 +51,7 @@ const Room = () => {
 
   const enableMoreIdea = dbProps?.settings?.enableMoreIdea;
   const enableLessIdea = dbProps?.settings?.enableLessIdea;
-  const disabledBtnAdd = !enableLessIdea && !enableMoreIdea && countIdea === 0;
+  const disabledBtnAdd = !enableMoreIdea && countIdea === 0;
   const ignoreCountIdea = enableLessIdea ? false : countIdea > 0;
   const disabledBtnSend =
     ownIdeas?.length === 0 || ignoreCountIdea || userReady;
