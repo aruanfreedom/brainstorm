@@ -9,14 +9,14 @@ export const useSteps = () => {
   const adminId = useSelector((state) => state.users.adminId);
   const navigation = useNavigate();
 
-  const updatedData = (newData) => {
+  const subscribe = (newData) => {
     if (!newData) return null;
     setStep(newData.step);
   };
 
   useEffect(() => {
     if (adminId) {
-      database.listenerData({ path: `rooms/${adminId}`, updatedData });
+      database.listenerData({ path: `rooms/${adminId}`, subscribe });
     }
   }, [adminId]);
 

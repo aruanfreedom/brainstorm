@@ -94,17 +94,17 @@ const removeFieldObject = ({ path, pathField, data, deleteFieldName }) => {
   });
 };
 
-const listenerData = ({ path, updatedData }) => {
+const listenerData = ({ path, subscribe }) => {
   const firestore = getFirestore();
   const ref = doc(firestore, path);
 
   onSnapshot(ref, (doc) => {
-    updatedData(doc.data());
+    subscribe(doc.data());
   });
 };
 
 const database = {
-  auth: () => getAuth(),
+  auth: getAuth,
   init,
   authChangeListener,
   reqistry,

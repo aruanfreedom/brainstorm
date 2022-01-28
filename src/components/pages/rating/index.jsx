@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Divider, List, Checkbox, Row } from "antd";
-import { useSelector } from "react-redux";
+import { Divider, List, Checkbox, Row, Button, Form } from "antd";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Timer from "../../timer";
 import database from "../../../database";
 import { DbContext } from "../../Context/db";
 import ThemeBrainstorm from "../../themeBrainstorm";
+import { resetUsersDone } from "../../../helpers/resetUsersDone";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -14,41 +15,102 @@ const SpaceVertical = styled.div`
 
 const Rating = () => {
   const dbProps = React.useContext(DbContext);
-  const [vote, setVote] = useState(null);
-  const users = useSelector((state) => state.users);
+  const [vote, setVote] = useState(0);
+  const [form] = Form.useForm();
   const { roomId } = useParams();
+  const [loading, setLoading] = useState(false);
+  const [resetTime, setResetTime] = useState(false);
+  const user = useSelector((state) => state.user);
 
+  const users = dbProps?.users;
   const timeVoute = dbProps?.settings?.timeVoute || 1;
   const raiting = dbProps?.settings?.countRaiting;
   const enableMoreRaiting = dbProps?.settings?.enableMoreRaiting;
   const sheetNumber = dbProps?.sheetNumber;
   const ideas = dbProps?.sheets?.[sheetNumber];
-  console.log(sheetNumber, ideas);
-  const onRaiting = (item, e) => {
-    const findedIdea = Object.values(users.data).find((user) =>
-      user.ideas.find((idea) => idea.title === item.title)
-    );
-    const checked = e.target.checked ? +1 : -1;
 
-    setVote((state) => (Number.isInteger(state) ? state + checked : 1));
+  const allReady = users && Object.values(users).every(({ done }) => done);
+  const userReady = users?.[user.uid]?.done;
+  const waitOthers = !allReady && userReady;
+  const isNextPage = users && sheetNumber === Object.keys(users).length;
+
+  const disabledBtnSend = !waitOthers && raiting - vote <= 0;
+  const disabledCheckboxes =
+    waitOthers || (raiting - vote === 0 && enableMoreRaiting === false);
+
+  const onRaiting = (idea, e) => {
+    const checkedNumber = e.target.checked ? +1 : -1;
+
+    const findedIdea = ideas.map((item) => {
+      if (idea === item.idea) {
+        return {
+          ...item,
+          raiting: item.raiting ? item.raiting + checkedNumber : 1,
+        };
+      }
+      return item;
+    });
+
+    setVote((state) =>
+      ideas.length <= raiting - vote ? ideas.length : state + checkedNumber
+    );
 
     database.writeData({
       path: `rooms/${roomId}`,
       data: {
-        users: {
-          [findedIdea.id]: {
-            ideas: users.data[findedIdea.id].ideas.map((idea) =>
-              idea.title === item.title
-                ? {
-                    ...idea,
-                    raiting: idea.raiting ? idea.raiting + checked : 1,
-                  }
-                : idea
-            ),
-          },
+        sheets: {
+          [sheetNumber]: findedIdea,
         },
       },
     });
+  };
+
+  useEffect(() => {
+    if (isNextPage) {
+      database.writeData({
+        path: `rooms/${roomId}`,
+        data: { step: 4 },
+      });
+
+      return;
+    }
+
+    if (allReady) {
+      setLoading(true);
+
+      database
+        .writeData({
+          path: `rooms/${roomId}`,
+          data: {
+            users: resetUsersDone(users),
+            sheetNumber: sheetNumber + 1,
+          },
+        })
+        .finally(() => {
+          form.resetFields();
+          setLoading(false);
+          setResetTime(false);
+        });
+    }
+  }, [allReady, sheetNumber, users]);
+
+  const sendRaiting = () => {
+    database
+      .writeData({
+        path: `rooms/${roomId}`,
+        data: {
+          users: {
+            [user.uid]: {
+              done: true,
+            },
+          },
+        },
+      })
+      .finally(() => {
+        setVote(0);
+        setLoading(false);
+        setResetTime(false);
+      });
   };
 
   return (
@@ -56,7 +118,7 @@ const Rating = () => {
       <Divider>Рэйтинг</Divider>
       <Row justify="space-between">
         <SpaceVertical>
-          Время: <Timer timeVoute={timeVoute} />
+          Время: <Timer timeVoute={timeVoute} resetTime={resetTime} />
         </SpaceVertical>
         <SpaceVertical>
           <ThemeBrainstorm />
@@ -65,20 +127,41 @@ const Rating = () => {
           Очки голосования: {raiting - vote < 0 ? 0 : raiting - vote}
         </SpaceVertical>
       </Row>
-      <List
-        bordered
-        dataSource={ideas}
-        renderItem={(item) => (
-          <List.Item>
-            <Checkbox
-              disabled={raiting - vote === 0 && enableMoreRaiting === false}
-              onClick={(e) => onRaiting(item, e)}
-            >
-              {item.idea}
-            </Checkbox>
-          </List.Item>
-        )}
-      />
+      <Row justify="center">
+        {waitOthers && <SpaceVertical>Ожидаем участников</SpaceVertical>}
+      </Row>
+      <Form name="rating" form={form}>
+        <List
+          bordered
+          dataSource={ideas}
+          footer={
+            <Row justify="center">
+              <Button
+                disabled={!disabledBtnSend || loading}
+                size="large"
+                type="primary"
+                onClick={sendRaiting}
+                block
+              >
+                Готово
+              </Button>
+            </Row>
+          }
+          renderItem={({ idea }) => (
+            <List.Item>
+              <Form.Item name="idea">
+                <Checkbox
+                  disabled={disabledCheckboxes}
+                  defaultChecked={false}
+                  onClick={(e) => onRaiting(idea, e)}
+                >
+                  {idea}
+                </Checkbox>
+              </Form.Item>
+            </List.Item>
+          )}
+        />
+      </Form>
     </>
   );
 };

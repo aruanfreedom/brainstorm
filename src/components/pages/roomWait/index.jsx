@@ -18,6 +18,9 @@ const RoomWait = () => {
   const { roomId } = useParams();
   const isAdmin = user.uid === roomId;
   const userCount = users.data ? Object.keys(users.data).length : 0;
+  const usersHasName = users.data
+    ? Object.values(users.data).some(({ name }) => !name)
+    : 0;
   const inputCopy = useRef(null);
 
   const onStart = () => {
@@ -97,7 +100,7 @@ const RoomWait = () => {
         <Col span={10}>
           {isAdmin ? (
             <Button
-              disabled={userCount < 2}
+              disabled={userCount < 2 || usersHasName}
               type="primary"
               onClick={onStart}
               size="large"

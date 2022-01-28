@@ -8,6 +8,7 @@ import database from "../../../database";
 import { DbContext } from "../../Context/db";
 import { compareProposition } from "../../../helpers/levenstein";
 import ThemeBrainstorm from "../../themeBrainstorm";
+import { resetUsersDone } from "../../../helpers/resetUsersDone";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -55,7 +56,8 @@ const Room = () => {
   const ignoreCountIdea = enableLessIdea ? false : countIdea > 0;
   const disabledBtnSend =
     ownIdeas?.length === 0 || ignoreCountIdea || userReady;
-  const waitOthers = countIdea === 0 && !allReady && userReady;
+  const waitOthers = !allReady && userReady;
+  const isNextPage = users && sheetNumber === Object.keys(users).length;
 
   const compareIdeas = (proposition) =>
     sheets &&
@@ -92,41 +94,46 @@ const Room = () => {
         },
       })
       .finally(() => {
-        setLoading(loading);
+        setLoading(false);
         setResetTime(false);
       });
   };
 
-  const nextStep = () => {
-    if (sheetNumber === Object.keys(users).length - 1) {
+  useEffect(async () => {
+    if (isNextPage) {
+      await database.writeData({
+        path: `rooms/${roomId}`,
+        data: { sheetNumber: 0 },
+      });
+
       database.writeData({
         path: `rooms/${roomId}`,
-        data: { step: 3, sheetNumber: 0 },
+        data: { step: 3 },
       });
-    }
-  };
 
-  useEffect(() => {
-    if (allReady && users) {
+      return;
+    }
+
+    if (allReady) {
+      setLoading(true);
       database
         .writeData({
           path: `rooms/${roomId}`,
           data: {
-            users: Object.keys(users).reduce((acc, key) => ({
-              [key]: { done: false },
-            })),
+            users: resetUsersDone(users),
             sheetNumber: sheetNumber + 1,
           },
         })
-        .then(() => nextStep())
         .finally(() => {
-          setLoading(loading);
+          setLoading(false);
           setResetTime(false);
         });
     }
-  }, [allReady, sheetNumber, users]);
+  }, [allReady, sheetNumber, users, isNextPage]);
 
   const sendIdeas = () => {
+    setLoading(true);
+
     database
       .writeData({
         path: `rooms/${roomId}`,
@@ -139,7 +146,7 @@ const Room = () => {
         },
       })
       .finally(() => {
-        setLoading(loading);
+        setLoading(false);
         setResetTime(false);
       });
   };
@@ -166,12 +173,12 @@ const Room = () => {
             footer={
               <Row justify="center">
                 <Button
-                  disabled={disabledBtnSend}
+                  disabled={disabledBtnSend || loading}
                   size="large"
                   type="primary"
                   onClick={sendIdeas}
                 >
-                  Отправить идей
+                  Готово
                 </Button>
               </Row>
             }
@@ -183,7 +190,7 @@ const Room = () => {
       </div>
       <div>
         <Form
-          name="basic"
+          name="room"
           form={form}
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
@@ -207,7 +214,7 @@ const Room = () => {
 
           <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
             <Button
-              disabled={disabledBtnAdd}
+              disabled={disabledBtnAdd || loading}
               size="large"
               type="primary"
               htmlType="submit"

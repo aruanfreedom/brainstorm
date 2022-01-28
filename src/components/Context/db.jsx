@@ -5,14 +5,14 @@ import PropTypes from "prop-types";
 import database from "../../database";
 import { addAdminId, addStart, addUsers } from "../../store/users";
 
-export const DbContext = React.createContext("db");
+export const DbContext = React.createContext();
 
 export const DatabaseContext = ({ children }) => {
   const [data, setData] = useState(null);
   const dispatch = useDispatch();
   const { roomId } = useParams();
 
-  const updatedData = (newData) => {
+  const subscribe = (newData) => {
     if (!newData) return null;
     dispatch(addUsers(newData.users));
     dispatch(addAdminId(newData.adminId));
@@ -22,7 +22,7 @@ export const DatabaseContext = ({ children }) => {
 
   useEffect(() => {
     if (roomId) {
-      database.listenerData({ path: `rooms/${roomId}`, updatedData });
+      database.listenerData({ path: `rooms/${roomId}`, subscribe });
     }
   }, [roomId]);
 

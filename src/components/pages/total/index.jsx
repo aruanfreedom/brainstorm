@@ -23,14 +23,7 @@ const Total = () => {
   const user = useSelector((state) => state.user);
   const { deleteAll } = useDelete();
   const isAdmin = user.uid === roomId;
-
-  const getAllIdeas = (users) =>
-    users &&
-    Object.values(users)
-      .map((item) => item.ideas)
-      .flat();
-
-  const ideas = getAllIdeas(dbProps?.users);
+  const ideas = dbProps?.sheets ? Object.values(dbProps.sheets).flat() : [];
   const isDelete = dbProps?.delete;
 
   useEffect(() => {
@@ -56,9 +49,7 @@ const Total = () => {
   const onExport = () => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      ideas
-        .map((item) => [item.title, item.idea, item.raiting].join(","))
-        .join("\n");
+      ideas.map((item) => [item.idea, item.raiting || 0].join(",")).join("\n");
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -90,9 +81,9 @@ const Total = () => {
               <List.Item>
                 <RowWrapper>
                   <Row justify="space-between">
-                    <div>{item.title}</div>{" "}
+                    <div>{item.idea}</div>{" "}
                     <div>
-                      <strong>{item.raiting}</strong>
+                      <strong>{item.raiting || 0}</strong>
                     </div>
                   </Row>
                 </RowWrapper>
