@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import styled from "styled-components";
 import { Divider, List, Checkbox, Row, Button, Form } from "antd";
 import { useParams } from "react-router-dom";
@@ -15,7 +15,7 @@ const SpaceVertical = styled.div`
 `;
 
 const Rating = () => {
-  const dbProps = React.useContext(DbContext);
+  const dbProps = useContext(DbContext);
   const [vote, setVote] = useState(0);
   const [form] = Form.useForm();
   const { roomId } = useParams();
@@ -66,11 +66,11 @@ const Rating = () => {
     });
   };
 
-  useEffect(() => {
+  useEffect(async () => {
     if (allReady) {
       setLoading(true);
 
-      database
+      await database
         .writeData({
           path: `rooms/${roomId}`,
           data: {
@@ -78,19 +78,18 @@ const Rating = () => {
             sheetNumber: sheetNumber + 1,
           },
         })
-        .then(() => {
-          if (!ideas[sheetNumber + 1]) {
-            database.writeData({
-              path: `rooms/${roomId}`,
-              data: { step: 4 },
-            });
-          }
-        })
         .finally(() => {
           form.resetFields();
           setLoading(false);
           setResetTime(false);
         });
+
+      if (!ideas[sheetNumber + 1]) {
+        database.writeData({
+          path: `rooms/${roomId}`,
+          data: { step: 4 },
+        });
+      }
     }
   }, [allReady, sheetNumber, users, isNextPage]);
 

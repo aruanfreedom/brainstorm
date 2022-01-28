@@ -3,7 +3,8 @@ import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import PropTypes from "prop-types";
 import database from "../../database";
-import { addAdminId, addStart, addUsers } from "../../store/users";
+import { addAdminId, addUsers } from "../../store/users";
+import { addSheets, addSheetNumber } from "../../store/lists";
 
 export const DbContext = React.createContext();
 
@@ -16,7 +17,8 @@ export const DatabaseContext = ({ children }) => {
     if (!newData) return null;
     dispatch(addUsers(newData.users));
     dispatch(addAdminId(newData.adminId));
-    dispatch(addStart(newData.start));
+    dispatch(addSheets(newData.sheets));
+    if ("sheetNumber" in newData) dispatch(addSheetNumber(newData.sheetNumber));
     setData(newData);
   };
 

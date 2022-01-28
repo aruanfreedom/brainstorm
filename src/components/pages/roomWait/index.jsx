@@ -30,26 +30,24 @@ const RoomWait = () => {
     });
   };
 
-  useEffect(() => {
+  useEffect(async () => {
     if (!users.loaded) return;
 
     if (!users.data?.[user.uid]) {
-      database
-        .writeData({
-          path: `rooms/${roomId}`,
-          data: {
-            users: {
-              [user.uid]: {
-                id: user.uid,
-                name: "",
-                lastName: "",
-              },
+      await database.writeData({
+        path: `rooms/${roomId}`,
+        data: {
+          users: {
+            [user.uid]: {
+              id: user.uid,
+              name: "",
+              lastName: "",
             },
           },
-        })
-        .then(() => {
-          dispatch(addMember());
-        });
+        },
+      });
+
+      dispatch(addMember());
     }
   }, [user, users]);
 

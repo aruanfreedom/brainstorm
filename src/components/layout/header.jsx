@@ -1,5 +1,5 @@
 import React from "react";
-import { Layout, Button, Row } from "antd";
+import { Layout, Button, Row, Modal } from "antd";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import database from "../../database";
@@ -28,46 +28,69 @@ const Exit = styled(Button)`
 const HeaderWrapper = () => {
   const user = useSelector((state) => state.user);
   const users = useSelector((state) => state.users);
+  const sheets = useSelector((state) => state.lists.sheets);
+  const sheetNumber = useSelector((state) => state.lists.sheets?.sheetNumber);
   const { deleteUser } = useDelete();
 
+  const getIdeas = (sheets, id) =>
+    Object.values(sheets)
+      .flat()
+      .filter((idea) => id === idea.id);
+
+  const result = [];
+
   const splitIdeas = () => {
-    const ideas = users.data[user.uid].ideas;
-    const result = {};
+    const ownIdeas = getIdeas(sheets, user.uid);
+
     const totalCountIdeas = Math.ceil(
-      ideas.length / Object.keys(users.data).length
+      ownIdeas.length / Object.keys(users.data).length
     );
+
     let halfNumber = 0;
 
-    if (ideas.length) {
-      Object.keys(users.data).forEach((id) => {
-        if (id !== user.uid) {
-          const value = users.data[id];
-          const halfIdea = [...ideas].splice(halfNumber, totalCountIdeas);
+    if (ownIdeas.length) {
+      ownIdeas.forEach(() => {
+        Object.keys(users.data).forEach((id) => {
+          if (id !== user.uid) {
+            const halfIdea = [...ownIdeas].splice(halfNumber, totalCountIdeas);
 
-          halfNumber = halfNumber + totalCountIdeas;
+            if (!halfIdea.length) return null;
 
-          result[id] = {
-            ideas: [...value.ideas, ...halfIdea],
-          };
-        }
+            const otherIdeas = getIdeas(sheets[sheetNumber], id);
+
+            halfNumber = halfNumber + totalCountIdeas;
+            const changedIdIdea = halfIdea.map((idea) => ({ ...idea, id }));
+            result.push([...changedIdIdea, ...otherIdeas]);
+          }
+        });
       });
     }
-    return result;
+    return result.flat();
   };
 
-  const exit = () => {
-    const usersChangedIdeas = splitIdeas();
+  const exit = async () => {
+    const sheetsShuffledIdeas = splitIdeas();
+    console.log(sheetsShuffledIdeas);
+    if (!users.adminId || !sheetsShuffledIdeas.length) return null;
 
-    if (!users.adminId) return null;
+    await database.writeData({
+      path: `rooms/${users.adminId}`,
+      data: {
+        sheets: { [sheetNumber]: sheetsShuffledIdeas },
+      },
+    });
 
-    database
-      .writeData({
-        path: `rooms/${users.adminId}`,
-        data: { users: usersChangedIdeas },
-      })
-      .then(() => {
-        deleteUser();
-      });
+    deleteUser();
+  };
+
+  const onExit = () => {
+    Modal.confirm({
+      title: "Подтвердите действие",
+      content: "Данные будут распределены по участникам. Вы уверенны?",
+      okText: "Да",
+      cancelText: "Нет",
+      onOk: exit,
+    });
   };
 
   return (
@@ -93,9 +116,7 @@ const HeaderWrapper = () => {
           <Title>Генерация идей</Title>
         </div>
         <div>
-          {users.start && users.data?.[user.uid]?.name && (
-            <Exit onClick={exit}>Выйти</Exit>
-          )}
+          {users.data?.[user.uid]?.name && <Exit onClick={onExit}>Выйти</Exit>}
         </div>
       </Row>
     </Header>

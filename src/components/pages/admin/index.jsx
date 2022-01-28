@@ -24,10 +24,10 @@ const Admin = () => {
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.user);
 
-  const onFinish = (formData) => {
+  const onFinish = async (formData) => {
     setLoading(true);
 
-    database
+    await database
       .writeData({
         path: `rooms/${user.uid}`,
         data: {
@@ -36,11 +36,10 @@ const Admin = () => {
           step: 1,
         },
       })
-      .then(() => {
-        dispatch(addSettings(formData));
-        dispatch(addAdminId(user.uid));
-      })
       .finally(() => setLoading(false));
+
+    dispatch(addSettings(formData));
+    dispatch(addAdminId(user.uid));
   };
 
   return (

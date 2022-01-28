@@ -5,7 +5,7 @@ export const usersSlice = createSlice({
   initialState: {
     data: null,
     loaded: false,
-    adminId: '',
+    adminId: "",
   },
   reducers: {
     addUsers: (state, { payload: users }) => {
@@ -19,12 +19,9 @@ export const usersSlice = createSlice({
     addAdminId: (state, { payload: id }) => {
       state.adminId = id;
     },
-    addStart: (state, { payload: start }) => {
-      state.start = start;
-    }
   },
 });
 
-export const { addUsers, clearUsersData, addAdminId, addStart } = usersSlice.actions;
+export const { addUsers, clearUsersData, addAdminId } = usersSlice.actions;
 
 export default usersSlice.reducer;

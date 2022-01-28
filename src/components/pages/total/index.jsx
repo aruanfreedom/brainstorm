@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Divider, List, Row, Button, Modal } from "antd";
 import styled from "styled-components";
 import { useParams } from "react-router-dom";
@@ -24,16 +24,10 @@ const Total = () => {
   const { deleteAll } = useDelete();
   const isAdmin = user.uid === roomId;
   const ideas = dbProps?.sheets ? Object.values(dbProps.sheets).flat() : [];
-  const isDelete = dbProps?.delete;
 
-  useEffect(() => {
-    if (isDelete) {
-      deleteAll();
-    }
-  }, [isDelete]);
-
-  const onOk = () => {
-    database.writeData({ path: `rooms/${roomId}`, data: { delete: true } });
+  const onOk = async () => {
+    await database.writeData({ path: `rooms/${roomId}`, data: { step: 0 } });
+    deleteAll();
   };
 
   const onComplete = () => {
