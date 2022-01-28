@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useContext } from "react";
 import { Divider, Input, Form, Button, Row, List } from "antd";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -9,6 +9,7 @@ import { DbContext } from "../../Context/db";
 import { compareProposition } from "../../../helpers/levenstein";
 import ThemeBrainstorm from "../../themeBrainstorm";
 import { resetUsersDone } from "../../../helpers/resetUsersDone";
+import WaitOthers from "../../waitOthers";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -21,7 +22,7 @@ const Error = styled.h4`
 `;
 
 const Room = () => {
-  const dbProps = React.useContext(DbContext);
+  const dbProps = useContext(DbContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [resetTime, setResetTime] = useState(false);
@@ -164,7 +165,9 @@ const Room = () => {
         <SpaceVertical>Необходимое количество идей: {countIdea}</SpaceVertical>
       </Row>
       <Row justify="center">
-        {waitOthers && <SpaceVertical>Ожидаем участников</SpaceVertical>}
+        <SpaceVertical>
+          <WaitOthers status={waitOthers} />
+        </SpaceVertical>
       </Row>
       <div>
         <SpaceVertical>

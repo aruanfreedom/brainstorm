@@ -8,6 +8,7 @@ import database from "../../../database";
 import { DbContext } from "../../Context/db";
 import ThemeBrainstorm from "../../themeBrainstorm";
 import { resetUsersDone } from "../../../helpers/resetUsersDone";
+import WaitOthers from "../../waitOthers";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -127,7 +128,9 @@ const Rating = () => {
         </SpaceVertical>
       </Row>
       <Row justify="center">
-        {waitOthers && <SpaceVertical>Ожидаем участников</SpaceVertical>}
+        <SpaceVertical>
+          <WaitOthers status={waitOthers} />
+        </SpaceVertical>
       </Row>
       <Form name="rating" form={form}>
         <List
