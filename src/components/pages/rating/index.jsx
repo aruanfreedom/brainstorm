@@ -66,15 +66,6 @@ const Rating = () => {
   };
 
   useEffect(() => {
-    if (isNextPage) {
-      database.writeData({
-        path: `rooms/${roomId}`,
-        data: { step: 4 },
-      });
-
-      return;
-    }
-
     if (allReady) {
       setLoading(true);
 
@@ -86,13 +77,21 @@ const Rating = () => {
             sheetNumber: sheetNumber + 1,
           },
         })
+        .then(() => {
+          if (!ideas[sheetNumber + 1]) {
+            database.writeData({
+              path: `rooms/${roomId}`,
+              data: { step: 4 },
+            });
+          }
+        })
         .finally(() => {
           form.resetFields();
           setLoading(false);
           setResetTime(false);
         });
     }
-  }, [allReady, sheetNumber, users]);
+  }, [allReady, sheetNumber, users, isNextPage]);
 
   const sendRaiting = () => {
     database
