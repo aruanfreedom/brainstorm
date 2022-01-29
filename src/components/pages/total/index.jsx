@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import database from "../../../database";
-import { DbContext } from "../../Context/db";
+import { DbContext } from "../../context/db";
 import { useDelete } from "../../../hooks/useDelete";
 import ThemeBrainstorm from "../../themeBrainstorm";
 

@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Timer from "../../timer";
 import database from "../../../database";
-import { DbContext } from "../../Context/db";
+import { DbContext } from "../../context/db";
 import ThemeBrainstorm from "../../themeBrainstorm";
 import { resetUsersDone } from "../../../helpers/resetUsersDone";
 import WaitOthers from "../../waitOthers";

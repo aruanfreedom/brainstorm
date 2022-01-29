@@ -1,5 +1,5 @@
 import React from "react";
-import { DbContext } from "../Context/db";
+import { DbContext } from "../context/db";
 
 const themeBrainstorm = () => {
   const dbProps = React.useContext(DbContext);

@@ -3,7 +3,7 @@ import { Layout } from "antd";
 import { Route, Routes } from "react-router-dom";
 import styled from "styled-components";
 import Header from "./header";
-import { DatabaseContext } from "../Context/db";
+import { DatabaseContext } from "../context/db";
 import Content from "./content";
 import Footer from "./footer";
 import NotFound from "../pages/notFound";

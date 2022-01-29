@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import Timer from "../../timer";
 import database from "../../../database";
-import { DbContext } from "../../Context/db";
+import { DbContext } from "../../context/db";
 import { compareProposition } from "../../../helpers/levenstein";
 import ThemeBrainstorm from "../../themeBrainstorm";
 import { resetUsersDone } from "../../../helpers/resetUsersDone";

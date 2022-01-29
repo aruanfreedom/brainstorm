@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import PropTypes from "prop-types";
-import { DbContext } from "../Context/db";
+import { DbContext } from "../context/db";
 
 const WaitOthers = ({ status }) => {
   const dbProps = useContext(DbContext);
