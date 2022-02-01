@@ -11,9 +11,11 @@ const Exit = styled(Button)`
 `;
 
 const getIdeas = (sheets, id) =>
-  Object.values(sheets)
-    .flat()
-    .filter((idea) => id === idea.id);
+  sheets
+    ? Object.values(sheets)
+        .flat()
+        .filter((idea) => id === idea.id)
+    : [];
 
 const ExitButton = () => {
   const user = useSelector((state) => state.user);
