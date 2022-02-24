@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useContext } from "react";
-import { Divider, Input, Form, Button, Row, List } from "antd";
+import { Divider, Input, Form, Button, Row } from "antd";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -10,6 +10,7 @@ import { compareProposition } from "../../../helpers/levenstein";
 import ThemeBrainstorm from "../../themeBrainstorm";
 import { resetUsersDone } from "../../../helpers/resetUsersDone";
 import WaitOthers from "../../waitOthers";
+import { ListsIdea } from "./components/listsIdea";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -55,7 +56,7 @@ const Room = () => {
   const enableLessIdea = dbProps?.settings?.enableLessIdea;
   const disabledBtnAdd = !enableMoreIdea && countIdea === 0;
   const ignoreCountIdea = enableLessIdea ? false : countIdea > 0;
-  const visibleLitsIdea =
+  const visibleListIdea =
     ownIdeas?.length === 0 || ignoreCountIdea || userReady;
   const waitOthers = !allReady && userReady;
   const isNextPage = users && sheetNumber === Object.keys(users).length;
@@ -101,7 +102,7 @@ const Room = () => {
   };
 
   const onKeyDown = (event) => {
-    if (event.key === "Enter" && event.ctrlKey) {
+    if (!disabledBtnAdd && event.key === "Enter" && event.ctrlKey) {
       onFinish({ idea: event.target.value });
     }
   };
@@ -138,26 +139,6 @@ const Room = () => {
     }
   }, [allReady, sheetNumber, users, isNextPage]);
 
-  const sendIdeas = () => {
-    setLoading(true);
-
-    database
-      .writeData({
-        path: `rooms/${roomId}`,
-        data: {
-          users: {
-            [user.uid]: {
-              done: true,
-            },
-          },
-        },
-      })
-      .finally(() => {
-        setLoading(false);
-        setResetTime(false);
-      });
-  };
-
   return (
     <>
       <Divider>Создание идей</Divider>
@@ -175,28 +156,13 @@ const Room = () => {
           <WaitOthers status={waitOthers} />
         </SpaceVertical>
       </Row>
-      <div style={{ display: visibleLitsIdea ? "none" : "block" }}>
-        <SpaceVertical>
-          <List
-            size="small"
-            footer={
-              <Row justify="center">
-                <Button
-                  disabled={loading}
-                  size="large"
-                  type="primary"
-                  onClick={sendIdeas}
-                >
-                  Готово
-                </Button>
-              </Row>
-            }
-            bordered
-            dataSource={ownIdeas}
-            renderItem={(item) => <List.Item>{item.idea}</List.Item>}
-          />
-        </SpaceVertical>
-      </div>
+      <ListsIdea
+        visible={visibleListIdea}
+        setResetTime={setResetTime}
+        ownIdeas={ownIdeas}
+        sheetNumber={sheetNumber}
+        currentSheets={currentSheets}
+      />
       <div>
         <Form
           name="room"
