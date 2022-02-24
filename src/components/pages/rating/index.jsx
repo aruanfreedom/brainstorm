@@ -26,7 +26,7 @@ const Rating = () => {
   const users = dbProps?.users;
   const timeVoute = dbProps?.settings?.timeVoute || 1;
   const raiting = dbProps?.settings?.countRaiting;
-  const enableMoreRaiting = dbProps?.settings?.enableMoreRaiting;
+  // const enableMoreRaiting = dbProps?.settings?.enableMoreRaiting;
   const sheetNumber = dbProps?.sheetNumber;
   const ideas = dbProps?.sheets?.[sheetNumber];
 
@@ -36,8 +36,6 @@ const Rating = () => {
   const isNextPage = users && sheetNumber === Object.keys(users).length;
 
   const disabledBtnSend = !waitOthers && raiting - vote <= 0;
-  const disabledCheckboxes =
-    waitOthers || (raiting - vote === 0 && enableMoreRaiting === false);
 
   const onRaiting = (idea, e) => {
     const checkedNumber = e.target.checked ? +1 : -1;
@@ -152,7 +150,6 @@ const Rating = () => {
             <List.Item>
               <Form.Item name="idea">
                 <Checkbox
-                  disabled={disabledCheckboxes}
                   defaultChecked={false}
                   onClick={(e) => onRaiting(idea, e)}
                 >
