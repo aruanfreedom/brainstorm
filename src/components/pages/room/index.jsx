@@ -55,7 +55,7 @@ const Room = () => {
   const enableLessIdea = dbProps?.settings?.enableLessIdea;
   const disabledBtnAdd = !enableMoreIdea && countIdea === 0;
   const ignoreCountIdea = enableLessIdea ? false : countIdea > 0;
-  const disabledBtnSend =
+  const visibleLitsIdea =
     ownIdeas?.length === 0 || ignoreCountIdea || userReady;
   const waitOthers = !allReady && userReady;
   const isNextPage = users && sheetNumber === Object.keys(users).length;
@@ -63,7 +63,7 @@ const Room = () => {
   const compareIdeas = (proposition) =>
     sheets &&
     Object.values(sheets).find((ideas) =>
-      ideas.find(({ idea }) => compareProposition(proposition, idea))
+      ownIdeas.find(({ idea }) => compareProposition(proposition, idea))
     );
 
   const onFinish = ({ idea }) => {
@@ -71,7 +71,7 @@ const Room = () => {
 
     if (findSimilarIdea) {
       return setError(
-        "Ваша идея совпадает с идеей другого участника. Нужно написать без повторов."
+        "Ваша идея совпадает с предыдущей идеей. Нужно написать без повторов."
       );
     }
 
@@ -98,6 +98,12 @@ const Room = () => {
         setLoading(false);
         setResetTime(false);
       });
+  };
+
+  const onKeyDown = (event) => {
+    if (event.key === "Enter" && event.ctrlKey) {
+      onFinish({ idea: event.target.value });
+    }
   };
 
   useEffect(async () => {
@@ -169,14 +175,14 @@ const Room = () => {
           <WaitOthers status={waitOthers} />
         </SpaceVertical>
       </Row>
-      <div>
+      <div style={{ display: visibleLitsIdea ? "none" : "block" }}>
         <SpaceVertical>
           <List
             size="small"
             footer={
               <Row justify="center">
                 <Button
-                  disabled={disabledBtnSend || loading}
+                  disabled={loading}
                   size="large"
                   type="primary"
                   onClick={sendIdeas}
@@ -210,7 +216,11 @@ const Room = () => {
               },
             ]}
           >
-            <Input.TextArea size="large" placeholder="Напишите идею" />
+            <Input.TextArea
+              onKeyDown={onKeyDown}
+              size="large"
+              placeholder="Напишите идею"
+            />
           </Form.Item>
 
           <Error>{error}</Error>

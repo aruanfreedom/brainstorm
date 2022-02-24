@@ -50,8 +50,7 @@ const compareWords = (word1, word2) => {
 
   const moreLetter = Math.max(word1.length, word2.length);
   const mainWord = moreLetter === word1.length ? word1 : word2;
-
-  return mainWord.length / 2 >= similarLetterNumber;
+  return mainWord.length / 3 >= similarLetterNumber;
 };
 
 export const compareProposition = (
