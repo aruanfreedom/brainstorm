@@ -22,6 +22,29 @@ const Timer = ({ timeVoute, resetTime }) => {
   const [time, setTime] = useState({ second: 0, minute: 1 });
   const [reset, setReset] = useState(resetTime);
 
+  const timeConvert = () => {
+    const timeFromStorage = localStorage.getItem("time");
+
+    if (timeFromStorage) {
+      const minutes = getMinutes(new Date(Number(timeFromStorage)));
+      const second = getSeconds(new Date(Number(timeFromStorage)));
+
+      const endtime =
+        minutes === 0
+          ? new Date("00")
+          : add(new Date("00"), { minutes: minutes ? minutes : timeVoute });
+
+      console.log(endtime, new Date("00"));
+      console.log(minutes, second);
+
+      setSecondLeft(() => second - 1);
+      const result = add(endtime, { seconds: second - 1 });
+      return result;
+    } else {
+      secondLeft = secondLeft - 1;
+    }
+  };
+
   const clear = () => {
     if (resetTime || reset) {
       clearTimeout(timerId);
