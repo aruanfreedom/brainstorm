@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { PAGES } from "../constants";
 import database from "../database";
+import { getId } from "../helpers/generateId";
 
 export const useSteps = () => {
   const [step, setStep] = useState(null);
-  const adminId = useSelector((state) => state.users.adminId);
+  const roomId = getId();
   const navigation = useNavigate();
 
   const subscribe = (newData) => {
@@ -15,10 +15,10 @@ export const useSteps = () => {
   };
 
   useEffect(() => {
-    if (adminId) {
-      database.listenerData({ path: `rooms/${adminId}`, subscribe });
+    if (roomId) {
+      database.listenerData({ path: `rooms/${roomId}`, subscribe });
     }
-  }, [adminId]);
+  }, [roomId]);
 
   useEffect(() => {
     switch (PAGES[step]) {
@@ -26,16 +26,16 @@ export const useSteps = () => {
         navigation(`/`);
         break;
       case PAGES[1]:
-        navigation(`roomWait/${adminId}`);
+        navigation(`roomWait/${roomId}`);
         break;
       case PAGES[2]:
-        navigation(`room/${adminId}`);
+        navigation(`room/${roomId}`);
         break;
       case PAGES[3]:
-        navigation(`rating/${adminId}`);
+        navigation(`rating/${roomId}`);
         break;
       case PAGES[4]:
-        navigation(`total/${adminId}`);
+        navigation(`total/${roomId}`);
         break;
       default:
         break;

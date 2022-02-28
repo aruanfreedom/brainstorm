@@ -10,10 +10,11 @@ import {
   Col,
 } from "antd";
 import styled from "styled-components";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import database from "../../../database";
 import { addSettings } from "../../../store/user";
 import { addAdminId } from "../../../store/users";
+import { generatePushID } from "../../../helpers/generateId";
 
 const FormWrapper = styled.div`
   margin-top: 50px;
@@ -22,24 +23,26 @@ const FormWrapper = styled.div`
 const Admin = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const user = useSelector((state) => state.user);
+  const getNewId = generatePushID();
 
   const onFinish = async (formData) => {
     setLoading(true);
+    const newId = getNewId();
+
+    dispatch(addSettings(formData));
+    dispatch(addAdminId(newId));
+
+    localStorage.setItem("roomId", newId);
 
     await database
       .writeData({
-        path: `rooms/${user.uid}`,
+        path: `rooms/${newId}`,
         data: {
           settings: formData,
-          adminId: user.uid,
           step: 1,
         },
       })
       .finally(() => setLoading(false));
-
-    dispatch(addSettings(formData));
-    dispatch(addAdminId(user.uid));
   };
 
   return (

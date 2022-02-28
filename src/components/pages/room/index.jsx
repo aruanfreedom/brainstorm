@@ -2,7 +2,6 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { Divider, Input, Form, Button, Row } from "antd";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
 import Timer from "../../timer";
 import database from "../../../database";
 import { DbContext } from "../../context/db";
@@ -11,6 +10,7 @@ import ThemeBrainstorm from "../../themeBrainstorm";
 import { resetUsersDone } from "../../../helpers/resetUsersDone";
 import WaitOthers from "../../waitOthers";
 import { ListsIdea } from "./components/listsIdea";
+import { getId } from "../../../helpers/generateId";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -30,7 +30,7 @@ const Room = () => {
   const [form] = Form.useForm();
   const user = useSelector((state) => state.user);
   const users = dbProps?.users;
-  const { roomId } = useParams();
+  const roomId = getId();
 
   const timeVoute = dbProps?.settings?.timeVoute;
   const sheetNumber = dbProps?.sheetNumber || 0;
@@ -124,6 +124,8 @@ const Room = () => {
 
     if (allReady) {
       setLoading(true);
+      setResetTime(true);
+
       database
         .writeData({
           path: `rooms/${roomId}`,

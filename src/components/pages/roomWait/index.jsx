@@ -1,22 +1,24 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
 import { Button, Input, Col, Row, Divider, List } from "antd";
 import database from "../../../database";
 import { addMember } from "../../../store/user";
 import styled from "styled-components";
 import UserModal from "../../userModal";
+import { getId } from "../../../helpers/generateId";
+import { DbContext } from "../../context/db";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
 `;
 
 const RoomWait = () => {
+  const dbProps = useContext(DbContext);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const users = useSelector((state) => state.users);
-  const { roomId } = useParams();
-  const isAdmin = user.uid === roomId;
+  const roomId = getId();
+  const isAdmin = user.uid === dbProps?.adminId;
   const userCount = users.data ? Object.keys(users.data).length : 0;
   const usersHasName = users.data
     ? Object.values(users.data).some(({ name }) => !name)
@@ -32,6 +34,15 @@ const RoomWait = () => {
 
   useEffect(async () => {
     if (!users.loaded) return;
+
+    if (users.data && Object.keys(users.data).length === 1) {
+      await database.writeData({
+        path: `rooms/${roomId}`,
+        data: {
+          adminId: user.uid,
+        },
+      });
+    }
 
     if (!users.data?.[user.uid]) {
       await database.writeData({

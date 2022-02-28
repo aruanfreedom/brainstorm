@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import styled from "styled-components";
 import { Divider, List, Checkbox, Row, Button, Form } from "antd";
-import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Timer from "../../timer";
 import database from "../../../database";
@@ -9,6 +8,7 @@ import { DbContext } from "../../context/db";
 import ThemeBrainstorm from "../../themeBrainstorm";
 import { resetUsersDone } from "../../../helpers/resetUsersDone";
 import WaitOthers from "../../waitOthers";
+import { getId } from "../../../helpers/generateId";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -18,7 +18,7 @@ const Rating = () => {
   const dbProps = useContext(DbContext);
   const [vote, setVote] = useState(0);
   const [form] = Form.useForm();
-  const { roomId } = useParams();
+  const roomId = getId();
   const [loading, setLoading] = useState(false);
   const [resetTime, setResetTime] = useState(false);
   const user = useSelector((state) => state.user);

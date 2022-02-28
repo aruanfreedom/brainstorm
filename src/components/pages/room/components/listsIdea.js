@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { List, Button, Row, Input, Col } from "antd";
 import styled from "styled-components";
-import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import { EditOutlined, CheckOutlined } from "@ant-design/icons";
+import { getId } from "../../../../helpers/generateId";
 
 import database from "../../../../database";
 
@@ -13,7 +13,7 @@ const SpaceVertical = styled.div`
 `;
 
 export const ListsIdea = ({ visible, setResetTime, ownIdeas, sheetNumber, currentSheets }) => {
-    const { roomId } = useParams();
+    const roomId = getId();
     const [editIdea, setEditIdea] = useState('');
     const [newIdea, setNewIdea] = useState('');
     const [loading, setLoading] = useState(false);

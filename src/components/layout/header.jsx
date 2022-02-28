@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Layout, Row } from "antd";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import ExitButton from "../exitButton";
+import { useNavigate } from "react-router-dom";
+import { clearUserData } from "../../store/user";
+import { clearUsersData } from "../../store/users";
+import { getId } from "../../helpers/generateId";
 
 const Header = styled(Layout.Header)``;
 
@@ -23,6 +27,19 @@ const Title = styled.h1`
 const HeaderWrapper = () => {
   const user = useSelector((state) => state.user);
   const users = useSelector((state) => state.users);
+  const roomId = getId();
+  const path = location.pathname.split("/");
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(async () => {
+    if (!roomId) {
+      navigate("/");
+      dispatch(clearUserData());
+      dispatch(clearUsersData());
+    }
+  }, [roomId, path]);
 
   return (
     <Header>

@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
 import PropTypes from "prop-types";
 import database from "../../database";
 import { addAdminId, addUsers } from "../../store/users";
 import { addSheets, addSheetNumber } from "../../store/lists";
+import { getId } from "../../helpers/generateId";
 
 export const DbContext = React.createContext();
 
 export const DatabaseContext = ({ children }) => {
   const [data, setData] = useState(null);
   const dispatch = useDispatch();
-  const { roomId } = useParams();
+  const roomId = getId();
 
   const subscribe = (newData) => {
     if (!newData) return null;
@@ -24,7 +24,10 @@ export const DatabaseContext = ({ children }) => {
 
   useEffect(() => {
     if (roomId) {
-      database.listenerData({ path: `rooms/${roomId}`, subscribe });
+      database.listenerData({
+        path: `rooms/${roomId}`,
+        subscribe,
+      });
     }
   }, [roomId]);
 

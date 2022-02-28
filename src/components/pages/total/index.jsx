@@ -1,12 +1,12 @@
 import React from "react";
 import { Divider, List, Row, Button, Modal } from "antd";
 import styled from "styled-components";
-import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import database from "../../../database";
 import { DbContext } from "../../context/db";
 import { useDelete } from "../../../hooks/useDelete";
 import ThemeBrainstorm from "../../themeBrainstorm";
+import { getId } from "../../../helpers/generateId";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -19,7 +19,7 @@ const RowWrapper = styled.div`
 
 const Total = () => {
   const dbProps = React.useContext(DbContext);
-  const { roomId } = useParams();
+  const roomId = getId();
   const user = useSelector((state) => state.user);
   const { deleteAll } = useDelete();
   const isAdmin = user.uid === roomId;
