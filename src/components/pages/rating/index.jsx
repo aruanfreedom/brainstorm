@@ -8,7 +8,7 @@ import { DbContext } from "../../context/db";
 import ThemeBrainstorm from "../../themeBrainstorm";
 import { resetUsersDone } from "../../../helpers/resetUsersDone";
 import WaitOthers from "../../waitOthers";
-import { getId } from "../../../helpers/generateId";
+import { useGetId } from "../../../helpers/generateId";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -18,7 +18,7 @@ const Rating = () => {
   const dbProps = useContext(DbContext);
   const [vote, setVote] = useState(0);
   const [form] = Form.useForm();
-  const roomId = getId();
+  const roomId = useGetId();
   const [loading, setLoading] = useState(false);
   const [resetTime, setResetTime] = useState(false);
   const user = useSelector((state) => state.user);

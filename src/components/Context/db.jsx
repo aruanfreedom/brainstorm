@@ -4,14 +4,14 @@ import PropTypes from "prop-types";
 import database from "../../database";
 import { addAdminId, addUsers } from "../../store/users";
 import { addSheets, addSheetNumber } from "../../store/lists";
-import { getId } from "../../helpers/generateId";
+import { useGetId } from "../../helpers/generateId";
 
 export const DbContext = React.createContext();
 
 export const DatabaseContext = ({ children }) => {
   const [data, setData] = useState(null);
   const dispatch = useDispatch();
-  const roomId = getId();
+  const roomId = useGetId();
 
   const subscribe = (newData) => {
     if (!newData) return null;

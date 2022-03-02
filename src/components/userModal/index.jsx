@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Input, Row } from "antd";
 import { useSelector } from "react-redux";
 import database from "../../database";
-import { getId } from "../../helpers/generateId";
+import { useGetId } from "../../helpers/generateId";
 
 const userModal = () => {
   const [visible, setVisible] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const user = useSelector((state) => state.user);
   const users = useSelector((state) => state.users);
-  const roomId = getId();
+  const roomId = useGetId();
 
   const onFinish = ({ name, lastName }) => {
     setConfirmLoading(true);

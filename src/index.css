@@ -6,3 +6,45 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.container-text-custom {
+  display: block;
+  margin: 0 auto;
+  transform: translateZ(0);
+  -webkit-text-size-adjust: none;
+}
+
+.textarea-idea {
+  display: block;
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  border: 2px solid #74637f;
+  border-radius: 0;
+  color: #444;
+  background-color: transparent;
+  overflow: auto;
+  resize: none;
+  transition: transform 1s;
+}
+
+.backdrop {
+  position: absolute;
+  z-index: 1;
+  border: 2px solid #685972;
+  background-color: #fff;
+  overflow: auto;
+  pointer-events: none;
+  transition: transform 1s;
+}
+
+.highlights {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: transparent;
+}
+
+mark {
+  border-radius: 3px;
+  background-color: #b1d5e5;
+}

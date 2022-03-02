@@ -46,36 +46,35 @@ const levenshtein = (string1, string2, costs) => {
 };
 
 const compareWords = (word1, word2) => {
-  const similarLetterNumber = levenshtein(word1, word2);
-
+  const diffLetterNumber = levenshtein(word1, word2);
   const moreLetter = Math.max(word1.length, word2.length);
   const mainWord = moreLetter === word1.length ? word1 : word2;
-  return mainWord.length / 3 >= similarLetterNumber;
+  return mainWord.length > 2 && mainWord.length / 3 >= diffLetterNumber;
 };
 
 export const compareProposition = (
   proposition1,
   proposition2,
-  procent = 90
+  // procent = 90
 ) => {
   const words1 = proposition1.split(" ");
   const words2 = proposition2.split(" ");
-  let similarWords = 0;
+  const similarWords = new Set();
 
   words1.forEach((w1) => {
     words2.forEach((w2) => {
       const str1 = w1.toLowerCase().trim();
       const str2 = w2.toLowerCase().trim();
       if (str1 && str2 && compareWords(str1, str2)) {
-        similarWords++;
+        similarWords.add(str1);
       }
     });
   });
 
   const moreProposition = Math.max(words1.length, words2.length);
   const mainProposition = moreProposition === words1.length ? words1 : words2;
-  const diffProcent = 100 - (mainProposition.length - similarWords) * 10;
-  return diffProcent > procent;
+  const diffProcent = 100 - (mainProposition.length - similarWords.size) * 10;
+  return { similarWords, diffProcent } ;
 };
 
 export default levenshtein;

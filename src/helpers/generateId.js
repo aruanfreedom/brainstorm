@@ -1,3 +1,5 @@
+import { useSelector } from "react-redux";
+
 export const generatePushID = () => {
  const PUSH_CHARS =
    "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
@@ -42,10 +44,11 @@ export const generatePushID = () => {
  };
 };
 
-export const getId = () => {
+export const useGetId = () => {
     const path = location.pathname.split("/");
     const roomIdUrl = path[path.length - 1];
     const roomId = localStorage["roomId"];
+    const users = useSelector((state) => state.users);
 
-    return roomIdUrl || roomId;
+    return roomIdUrl || roomId || users.adminId;
 }

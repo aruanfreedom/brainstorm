@@ -6,7 +6,7 @@ import database from "../../../database";
 import { DbContext } from "../../context/db";
 import { useDelete } from "../../../hooks/useDelete";
 import ThemeBrainstorm from "../../themeBrainstorm";
-import { getId } from "../../../helpers/generateId";
+import { useGetId } from "../../../helpers/generateId";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -19,10 +19,10 @@ const RowWrapper = styled.div`
 
 const Total = () => {
   const dbProps = React.useContext(DbContext);
-  const roomId = getId();
+  const roomId = useGetId();
   const user = useSelector((state) => state.user);
   const { deleteAll } = useDelete();
-  const isAdmin = user.uid === roomId;
+  const isAdmin = user.uid === dbProps?.adminId;
   const ideas = dbProps?.sheets ? Object.values(dbProps.sheets).flat() : [];
 
   const onOk = async () => {

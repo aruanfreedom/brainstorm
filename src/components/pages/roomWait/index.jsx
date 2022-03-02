@@ -5,7 +5,7 @@ import database from "../../../database";
 import { addMember } from "../../../store/user";
 import styled from "styled-components";
 import UserModal from "../../userModal";
-import { getId } from "../../../helpers/generateId";
+import { useGetId } from "../../../helpers/generateId";
 import { DbContext } from "../../context/db";
 
 const SpaceVertical = styled.div`
@@ -17,7 +17,7 @@ const RoomWait = () => {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const users = useSelector((state) => state.users);
-  const roomId = getId();
+  const roomId = useGetId();
   const isAdmin = user.uid === dbProps?.adminId;
   const userCount = users.data ? Object.keys(users.data).length : 0;
   const usersHasName = users.data

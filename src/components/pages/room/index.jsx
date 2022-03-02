@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect, useContext } from "react";
-import { Divider, Input, Form, Button, Row } from "antd";
+import React, { useState, useMemo, useEffect, useContext, useRef } from "react";
+import { Divider, Form, Button, Row } from "antd";
 import styled from "styled-components";
+import ContentEditable from "react-contenteditable";
 import { useSelector } from "react-redux";
 import Timer from "../../timer";
 import database from "../../../database";
@@ -10,7 +11,7 @@ import ThemeBrainstorm from "../../themeBrainstorm";
 import { resetUsersDone } from "../../../helpers/resetUsersDone";
 import WaitOthers from "../../waitOthers";
 import { ListsIdea } from "./components/listsIdea";
-import { getId } from "../../../helpers/generateId";
+import { useGetId } from "../../../helpers/generateId";
 
 const SpaceVertical = styled.div`
   padding-bottom: 30px;
@@ -30,7 +31,9 @@ const Room = () => {
   const [form] = Form.useForm();
   const user = useSelector((state) => state.user);
   const users = dbProps?.users;
-  const roomId = getId();
+  const roomId = useGetId();
+  const textarea = useRef(null);
+  const [html, setHtml] = useState("");
 
   const timeVoute = dbProps?.settings?.timeVoute;
   const sheetNumber = dbProps?.sheetNumber || 0;
@@ -62,15 +65,33 @@ const Room = () => {
   const isNextPage = users && sheetNumber === Object.keys(users).length;
 
   const compareIdeas = (proposition) =>
-    sheets &&
-    Object.values(sheets).find((ideas) =>
-      ownIdeas.find(({ idea }) => compareProposition(proposition, idea))
-    );
+    ownIdeas?.length &&
+    ownIdeas.map(({ idea }) => compareProposition(proposition, idea));
 
-  const onFinish = ({ idea }) => {
-    const findSimilarIdea = compareIdeas(idea);
+  const onFocus = () => {
+    const clearText = html.replace(/[<]\w+[>]|[<][/]\w+[>]/g, "");
+    setHtml(clearText);
+  };
 
-    if (findSimilarIdea) {
+  const onFinish = () => {
+    const findedSimilarIdea = compareIdeas(html);
+
+    if (
+      findedSimilarIdea.length &&
+      findedSimilarIdea.find(({ diffProcent }) => diffProcent >= 90)
+    ) {
+      let words = "";
+
+      findedSimilarIdea.forEach(({ similarWords }) => {
+        similarWords.forEach((word) => {
+          words += `<mark>${word}</mark>`;
+        });
+      });
+
+      setHtml(words);
+    }
+
+    if (findedSimilarIdea.length) {
       return setError(
         "Ваша идея совпадает с предыдущей идеей. Нужно написать без повторов."
       );
@@ -90,7 +111,7 @@ const Room = () => {
         path: `rooms/${roomId}`,
         data: {
           sheets: {
-            [sheetNumber]: [...sheet, { id: user.uid, idea }],
+            [sheetNumber]: [...sheet, { id: user.uid, idea: html }],
           },
           sheetNumber,
         },
@@ -105,6 +126,11 @@ const Room = () => {
     if (!disabledBtnAdd && event.key === "Enter" && event.ctrlKey) {
       onFinish({ idea: event.target.value });
     }
+  };
+
+  const handleChange = (event) => {
+    const value = event.target.value;
+    setHtml(value);
   };
 
   useEffect(async () => {
@@ -184,10 +210,14 @@ const Room = () => {
               },
             ]}
           >
-            <Input.TextArea
+            <ContentEditable
+              innerRef={textarea}
+              html={html}
+              disabled={false}
               onKeyDown={onKeyDown}
-              size="large"
-              placeholder="Напишите идею"
+              onChange={handleChange}
+              onFocus={onFocus}
+              tagName="article"
             />
           </Form.Item>
 
