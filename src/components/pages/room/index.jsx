@@ -101,6 +101,7 @@ const Room = () => {
     setResetTime(true);
     setLoading(true);
     form.resetFields();
+    setHtml("");
 
     const sheet = sheets?.[sheetNumber]?.length
       ? [...dbProps.sheets[sheetNumber]]
