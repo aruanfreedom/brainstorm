@@ -68,13 +68,13 @@ const Room = () => {
     ownIdeas?.length &&
     ownIdeas.map(({ idea }) => compareProposition(proposition, idea));
 
-  const onFocus = () => {
-    const clearText = html.replace(/[<]\w+[>]|[<][/]\w+[>]/g, "");
-    setHtml(clearText);
+  const clearText = (value) => {
+    return value.replace(/[<]\w+[>]|[<][/]\w+[>]/g, " ");
   };
 
   const onFinish = () => {
-    const findedSimilarIdea = compareIdeas(html);
+    const text = clearText(html);
+    const findedSimilarIdea = compareIdeas(text);
 
     if (
       findedSimilarIdea.length &&
@@ -82,19 +82,25 @@ const Room = () => {
     ) {
       let words = "";
 
-      findedSimilarIdea.forEach(({ similarWords }) => {
-        similarWords.forEach((word) => {
-          words += `<mark>${word}</mark>`;
+      html.split(" ").forEach((word1) => {
+        let finded = false;
+        findedSimilarIdea.forEach(({ similarWords }) => {
+          similarWords.forEach((word2) => {
+            if (word1.trim() === word2.trim()) {
+              finded = true;
+            }
+          });
         });
+
+        words += finded && word1 ? `<mark>${word1}</mark> ` : word1;
       });
 
       setHtml(words);
-    }
-
-    if (findedSimilarIdea.length) {
-      return setError(
+      setError(
         "Ваша идея совпадает с предыдущей идеей. Нужно написать без повторов."
       );
+
+      return null;
     }
 
     setError("");
@@ -112,7 +118,7 @@ const Room = () => {
         path: `rooms/${roomId}`,
         data: {
           sheets: {
-            [sheetNumber]: [...sheet, { id: user.uid, idea: html }],
+            [sheetNumber]: [...sheet, { id: user.uid, idea: text }],
           },
           sheetNumber,
         },
@@ -125,12 +131,13 @@ const Room = () => {
 
   const onKeyDown = (event) => {
     if (!disabledBtnAdd && event.key === "Enter" && event.ctrlKey) {
+      event.preventDefault();
       onFinish({ idea: event.target.value });
     }
   };
 
   const handleChange = (event) => {
-    const value = event.target.value;
+    const value = event.nativeEvent.target.textContent;
     setHtml(value);
   };
 
@@ -217,8 +224,8 @@ const Room = () => {
               disabled={false}
               onKeyDown={onKeyDown}
               onChange={handleChange}
-              onFocus={onFocus}
               tagName="article"
+              className="textarea-idea"
             />
           </Form.Item>
 

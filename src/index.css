@@ -16,15 +16,14 @@ body {
 
 .textarea-idea {
   display: block;
-  position: absolute;
-  z-index: 2;
-  margin: 0;
   border: 2px solid #74637f;
-  border-radius: 0;
+  border-radius: 4px;
+  padding: 5px 10px;
   color: #444;
   background-color: transparent;
   overflow: auto;
   resize: none;
+  min-height: 80px;
   transition: transform 1s;
 }
 

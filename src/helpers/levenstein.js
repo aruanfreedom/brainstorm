@@ -57,8 +57,8 @@ export const compareProposition = (
   proposition2,
   // procent = 90
 ) => {
-  const words1 = proposition1.split(" ");
-  const words2 = proposition2.split(" ");
+  const words1 = proposition1.trim().split(" ");
+  const words2 = proposition2.trim().split(" ");
   const similarWords = new Set();
 
   words1.forEach((w1) => {
